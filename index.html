@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>호흡 연습 - Breathing Exercise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f6f7f6',
+                            100: '#e3e7e3',
+                            200: '#c7d0c7',
+                            300: '#a3b1a3',
+                            400: '#7d8f7d',
+                            500: '#627362',
+                            600: '#4d5c4d',
+                            700: '#404b40',
+                            800: '#363e36',
+                            900: '#2e352e',
+                        },
+                        ocean: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#b9e5fe',
+                            300: '#7cd3fd',
+                            400: '#36bffa',
+                            500: '#0ca5eb',
+                            600: '#0084c9',
+                            700: '#0169a3',
+                            800: '#065986',
+                            900: '#0b4a6f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
+
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4e8e4 50%, #e8ece4 100%);
+            min-height: 100vh;
+        }
+
+        /* 메인 호흡 원 */
+        .breath-circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7cd3fd 0%, #36bffa 50%, #0ca5eb 100%);
+            box-shadow:
+                0 0 60px rgba(54, 191, 250, 0.4),
+                0 0 100px rgba(54, 191, 250, 0.2),
+                inset 0 0 40px rgba(255, 255, 255, 0.3);
+            transition: transform 0.1s ease-out;
+        }
+
+        .breath-circle::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 30%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            filter: blur(10px);
+        }
+
+        /* 물결 효과 */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(54, 191, 250, 0.4);
+            animation: ripple-animation 3s ease-out infinite;
+            pointer-events: none;
+        }
+
+        .ripple:nth-child(1) { animation-delay: 0s; }
+        .ripple:nth-child(2) { animation-delay: 1s; }
+        .ripple:nth-child(3) { animation-delay: 2s; }
+
+        @keyframes ripple-animation {
+            0% {
+                width: 100%;
+                height: 100%;
+                opacity: 0.6;
+                top: 0%;
+                left: 0%;
+            }
+            100% {
+                width: 200%;
+                height: 200%;
+                opacity: 0;
+                top: -50%;
+                left: -50%;
+            }
+        }
+
+        /* 호흡 단계별 색상 */
+        .inhale .breath-circle {
+            background: linear-gradient(135deg, #7cd3fd 0%, #36bffa 50%, #0ca5eb 100%);
+        }
+
+        .hold .breath-circle {
+            background: linear-gradient(135deg, #a3b1a3 0%, #7d8f7d 50%, #627362 100%);
+        }
+
+        .exhale .breath-circle {
+            background: linear-gradient(135deg, #c7d0c7 0%, #a3b1a3 50%, #7d8f7d 100%);
+        }
+
+        /* 버튼 애니메이션 */
+        .btn-breathing {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-breathing::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-breathing:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-breathing:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(54, 191, 250, 0.3);
+        }
+
+        /* 기록 카드 */
+        .history-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .history-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 진행 바 */
+        .progress-bar {
+            background: linear-gradient(90deg, #36bffa, #0ca5eb);
+            transition: width 0.1s linear;
+        }
+
+        /* 페이드 애니메이션 */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 카운트다운 애니메이션 */
+        .countdown-number {
+            animation: countdownPulse 1s ease-in-out;
+        }
+
+        @keyframes countdownPulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 스크롤바 스타일 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(54, 191, 250, 0.5);
+            border-radius: 3px;
+        }
+
+        /* 볼륨 슬라이더 */
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(54, 191, 250, 0.3);
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #36bffa;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- 헤더 -->
+        <header class="text-center mb-8 fade-in">
+            <h1 class="text-3xl md:text-4xl font-semibold text-sage-700 mb-2">
+                🌿 호흡 연습
+            </h1>
+            <p class="text-sage-500 text-sm md:text-base">
+                마음을 가라앉히고, 깊은 호흡으로 평온을 찾아보세요
+            </p>
+        </header>
+
+        <!-- 오늘의 기록 배지 -->
+        <div class="flex justify-center mb-6 fade-in" style="animation-delay: 0.1s;">
+            <div class="bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
+                <span class="text-sage-600 font-medium">오늘의 연습: </span>
+                <span id="todayCount" class="text-ocean-600 font-bold text-xl">0</span>
+                <span class="text-sage-500">회</span>
+            </div>
+        </div>
+
+        <!-- 메인 호흡 영역 -->
+        <div id="breathingArea" class="flex flex-col items-center justify-center py-8 md:py-12">
+            <!-- 상태 텍스트 -->
+            <div id="statusText" class="text-center mb-8 h-20">
+                <p id="phaseText" class="text-2xl md:text-3xl font-medium text-sage-700 mb-2">
+                    준비되셨나요?
+                </p>
+                <p id="timerText" class="text-4xl md:text-5xl font-light text-ocean-500">
+
+                </p>
+            </div>
+
+            <!-- 호흡 원 컨테이너 -->
+            <div class="relative flex items-center justify-center" style="width: 300px; height: 300px;">
+                <div id="breathCircle" class="breath-circle flex items-center justify-center">
+                    <div class="ripple"></div>
+                    <div class="ripple"></div>
+                    <div class="ripple"></div>
+                </div>
+            </div>
+
+            <!-- 진행 바 -->
+            <div class="w-full max-w-md mt-8 mb-4">
+                <div class="h-2 bg-white/50 rounded-full overflow-hidden shadow-inner">
+                    <div id="progressBar" class="progress-bar h-full rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-sage-500 mt-1">
+                    <span>흡기 20초</span>
+                    <span>홀딩 3초</span>
+                    <span>뱉기 20초</span>
+                </div>
+            </div>
+
+            <!-- 컨트롤 버튼 -->
+            <div class="flex gap-4 mt-6">
+                <button id="startBtn" class="btn-breathing bg-gradient-to-r from-ocean-400 to-ocean-500 text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg">
+                    시작하기
+                </button>
+                <button id="stopBtn" class="btn-breathing bg-gradient-to-r from-sage-400 to-sage-500 text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg hidden">
+                    중지
+                </button>
+            </div>
+
+            <!-- 볼륨 컨트롤 -->
+            <div class="flex items-center gap-3 mt-6 text-sage-500">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"/>
+                </svg>
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="30">
+                <span id="volumeValue" class="text-sm w-8">30%</span>
+            </div>
+        </div>
+
+        <!-- 연습 기록 -->
+        <div class="mt-8 fade-in" style="animation-delay: 0.2s;">
+            <h2 class="text-xl font-semibold text-sage-700 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                연습 기록
+            </h2>
+            <div id="historyList" class="grid gap-3 max-h-64 overflow-y-auto pr-2">
+                <!-- 기록이 여기에 표시됩니다 -->
+            </div>
+            <p id="noHistory" class="text-center text-sage-400 py-8 hidden">
+                아직 연습 기록이 없습니다.<br>첫 번째 호흡 연습을 시작해보세요!
+            </p>
+        </div>
+
+        <!-- 푸터 -->
+        <footer class="text-center mt-12 pb-4 text-sage-400 text-sm">
+            <p>매일 조금씩, 마음의 평화를 찾아가세요 🍃</p>
+        </footer>
+    </div>
+
+    <script>
+        // ==================== 상태 관리 ====================
+        const state = {
+            isRunning: false,
+            isPaused: false,
+            currentPhase: 'idle', // idle, countdown, inhale, hold, exhale, complete
+            phaseTime: 0,
+            totalTime: 0,
+            animationFrame: null,
+            startTime: null,
+            audioContext: null,
+            oscillators: [],
+            gainNodes: [],
+            volume: 0.3
+        };
+
+        // 호흡 사이클 설정
+        const CYCLE = {
+            countdown: 3,
+            inhale: 20,
+            hold: 3,
+            exhale: 20,
+            get total() { return this.inhale + this.hold + this.exhale; }
+        };
+
+        // ==================== DOM 요소 ====================
+        const elements = {
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            breathCircle: document.getElementById('breathCircle'),
+            breathingArea: document.getElementById('breathingArea'),
+            phaseText: document.getElementById('phaseText'),
+            timerText: document.getElementById('timerText'),
+            progressBar: document.getElementById('progressBar'),
+            todayCount: document.getElementById('todayCount'),
+            historyList: document.getElementById('historyList'),
+            noHistory: document.getElementById('noHistory'),
+            volumeSlider: document.getElementById('volumeSlider'),
+            volumeValue: document.getElementById('volumeValue')
+        };
+
+        // ==================== 오디오 (Web Audio API) ====================
+        function initAudio() {
+            if (state.audioContext) return;
+
+            state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function createAmbientSound() {
+            if (!state.audioContext) initAudio();
+
+            const ctx = state.audioContext;
+
+            // 여러 층의 부드러운 사운드 생성
+            const frequencies = [
+                { freq: 174, type: 'sine', gain: 0.15 },      // 기본 베이스
+                { freq: 261.63, type: 'sine', gain: 0.08 },  // C4
+                { freq: 329.63, type: 'sine', gain: 0.06 },  // E4
+                { freq: 392, type: 'sine', gain: 0.05 },     // G4
+                { freq: 523.25, type: 'sine', gain: 0.03 },  // C5 (하모닉스)
+            ];
+
+            frequencies.forEach(({ freq, type, gain }) => {
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                const filter = ctx.createBiquadFilter();
+
+                oscillator.type = type;
+                oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+
+                // 부드러운 LFO로 미세한 떨림 효과
+                const lfo = ctx.createOscillator();
+                const lfoGain = ctx.createGain();
+                lfo.frequency.setValueAtTime(0.1 + Math.random() * 0.2, ctx.currentTime);
+                lfoGain.gain.setValueAtTime(2, ctx.currentTime);
+                lfo.connect(lfoGain);
+                lfoGain.connect(oscillator.frequency);
+                lfo.start();
+
+                // 로우패스 필터로 부드러운 소리
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, ctx.currentTime);
+                filter.Q.setValueAtTime(1, ctx.currentTime);
+
+                // 페이드 인
+                gainNode.gain.setValueAtTime(0, ctx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(gain * state.volume, ctx.currentTime + 2);
+
+                oscillator.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                oscillator.start();
+
+                state.oscillators.push(oscillator);
+                state.oscillators.push(lfo);
+                state.gainNodes.push(gainNode);
+            });
+
+            // 화이트 노이즈 (바람 소리 효과)
+            const bufferSize = 2 * ctx.sampleRate;
+            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            const whiteNoise = ctx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+
+            const noiseFilter = ctx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(200, ctx.currentTime);
+
+            const noiseGain = ctx.createGain();
+            noiseGain.gain.setValueAtTime(0, ctx.currentTime);
+            noiseGain.gain.linearRampToValueAtTime(0.02 * state.volume, ctx.currentTime + 2);
+
+            whiteNoise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(ctx.destination);
+
+            whiteNoise.start();
+
+            state.oscillators.push(whiteNoise);
+            state.gainNodes.push(noiseGain);
+        }
+
+        function stopAudio() {
+            const ctx = state.audioContext;
+            if (!ctx) return;
+
+            // 페이드 아웃
+            state.gainNodes.forEach(gainNode => {
+                gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
+            });
+
+            // 1초 후 오실레이터 정지
+            setTimeout(() => {
+                state.oscillators.forEach(osc => {
+                    try { osc.stop(); } catch (e) {}
+                });
+                state.oscillators = [];
+                state.gainNodes = [];
+            }, 1000);
+        }
+
+        function updateVolume(value) {
+            state.volume = value / 100;
+            elements.volumeValue.textContent = `${value}%`;
+
+            // 실행 중이면 볼륨 업데이트
+            if (state.isRunning && state.gainNodes.length > 0) {
+                const ctx = state.audioContext;
+                const baseGains = [0.15, 0.08, 0.06, 0.05, 0.03, 0.02];
+                state.gainNodes.forEach((gainNode, i) => {
+                    const baseGain = baseGains[Math.min(i, baseGains.length - 1)];
+                    gainNode.gain.linearRampToValueAtTime(baseGain * state.volume, ctx.currentTime + 0.1);
+                });
+            }
+        }
+
+        // ==================== 애니메이션 ====================
+        function updateCircleSize(progress) {
+            // progress: 0 = 최소 크기, 1 = 최대 크기
+            const minScale = 0.6;
+            const maxScale = 1.5;
+            const scale = minScale + (maxScale - minScale) * progress;
+
+            elements.breathCircle.style.transform = `scale(${scale})`;
+        }
+
+        function setPhaseClass(phase) {
+            elements.breathingArea.classList.remove('inhale', 'hold', 'exhale');
+            if (phase === 'inhale' || phase === 'hold' || phase === 'exhale') {
+                elements.breathingArea.classList.add(phase);
+            }
+        }
+
+        // ==================== 타이머 로직 ====================
+        function startBreathing() {
+            if (state.isRunning) return;
+
+            state.isRunning = true;
+            state.currentPhase = 'countdown';
+            state.phaseTime = CYCLE.countdown;
+            state.totalTime = 0;
+
+            elements.startBtn.classList.add('hidden');
+            elements.stopBtn.classList.remove('hidden');
+
+            // 오디오 초기화 및 재생
+            initAudio();
+            if (state.audioContext.state === 'suspended') {
+                state.audioContext.resume();
+            }
+            createAmbientSound();
+
+            runCountdown();
+        }
+
+        function runCountdown() {
+            let count = CYCLE.countdown;
+
+            elements.phaseText.textContent = '준비';
+            elements.timerText.innerHTML = `<span class="countdown-number">${count}</span>`;
+            elements.timerText.classList.add('text-6xl');
+
+            const countdownInterval = setInterval(() => {
+                count--;
+
+                if (count > 0) {
+                    elements.timerText.innerHTML = `<span class="countdown-number">${count}</span>`;
+                } else {
+                    clearInterval(countdownInterval);
+                    elements.timerText.classList.remove('text-6xl');
+                    startBreathCycle();
+                }
+            }, 1000);
+
+            state.countdownInterval = countdownInterval;
+        }
+
+        function startBreathCycle() {
+            state.currentPhase = 'inhale';
+            state.startTime = performance.now();
+            state.phaseTime = 0;
+
+            requestAnimationFrame(updateBreathing);
+        }
+
+        function updateBreathing(timestamp) {
+            if (!state.isRunning) return;
+
+            const elapsed = (timestamp - state.startTime) / 1000;
+
+            let phase, phaseElapsed, phaseTotal, circleProgress;
+
+            if (elapsed < CYCLE.inhale) {
+                // 흡기
+                phase = 'inhale';
+                phaseElapsed = elapsed;
+                phaseTotal = CYCLE.inhale;
+                circleProgress = elapsed / CYCLE.inhale;
+            } else if (elapsed < CYCLE.inhale + CYCLE.hold) {
+                // 홀딩
+                phase = 'hold';
+                phaseElapsed = elapsed - CYCLE.inhale;
+                phaseTotal = CYCLE.hold;
+                circleProgress = 1;
+            } else if (elapsed < CYCLE.total) {
+                // 뱉기
+                phase = 'exhale';
+                phaseElapsed = elapsed - CYCLE.inhale - CYCLE.hold;
+                phaseTotal = CYCLE.exhale;
+                circleProgress = 1 - (phaseElapsed / CYCLE.exhale);
+            } else {
+                // 완료
+                completeBreathing();
+                return;
+            }
+
+            // UI 업데이트
+            const phaseNames = {
+                inhale: '들이쉬기',
+                hold: '멈추기',
+                exhale: '내쉬기'
+            };
+
+            const remaining = Math.ceil(phaseTotal - phaseElapsed);
+
+            if (state.currentPhase !== phase) {
+                state.currentPhase = phase;
+                setPhaseClass(phase);
+            }
+
+            elements.phaseText.textContent = phaseNames[phase];
+            elements.timerText.textContent = remaining;
+
+            // 원 크기 업데이트 (부드러운 easing)
+            const easedProgress = easeInOutCubic(circleProgress);
+            updateCircleSize(easedProgress);
+
+            // 진행 바 업데이트
+            const totalProgress = (elapsed / CYCLE.total) * 100;
+            elements.progressBar.style.width = `${totalProgress}%`;
+
+            state.animationFrame = requestAnimationFrame(updateBreathing);
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5
+                ? 4 * t * t * t
+                : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function completeBreathing() {
+            state.isRunning = false;
+            state.currentPhase = 'complete';
+
+            // 기록 저장
+            saveExercise();
+
+            // UI 리셋
+            elements.phaseText.textContent = '완료!';
+            elements.timerText.textContent = '🎉';
+            elements.progressBar.style.width = '100%';
+
+            // 오디오 정지
+            stopAudio();
+
+            // 2초 후 리셋
+            setTimeout(() => {
+                resetUI();
+            }, 2000);
+        }
+
+        function stopBreathing() {
+            state.isRunning = false;
+
+            if (state.countdownInterval) {
+                clearInterval(state.countdownInterval);
+            }
+
+            if (state.animationFrame) {
+                cancelAnimationFrame(state.animationFrame);
+            }
+
+            stopAudio();
+            resetUI();
+        }
+
+        function resetUI() {
+            state.currentPhase = 'idle';
+
+            elements.startBtn.classList.remove('hidden');
+            elements.stopBtn.classList.add('hidden');
+            elements.phaseText.textContent = '준비되셨나요?';
+            elements.timerText.textContent = '';
+            elements.progressBar.style.width = '0%';
+
+            updateCircleSize(0.5);
+            setPhaseClass('idle');
+        }
+
+        // ==================== 기록 저장 (localStorage) ====================
+        function getStorageKey() {
+            return 'breathingExerciseHistory';
+        }
+
+        function getTodayKey() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function loadHistory() {
+            try {
+                const data = localStorage.getItem(getStorageKey());
+                return data ? JSON.parse(data) : {};
+            } catch (e) {
+                console.error('기록 로드 실패:', e);
+                return {};
+            }
+        }
+
+        function saveExercise() {
+            const history = loadHistory();
+            const today = getTodayKey();
+
+            if (!history[today]) {
+                history[today] = { count: 0, times: [] };
+            }
+
+            history[today].count++;
+            history[today].times.push(new Date().toISOString());
+
+            try {
+                localStorage.setItem(getStorageKey(), JSON.stringify(history));
+                updateHistoryUI();
+            } catch (e) {
+                console.error('기록 저장 실패:', e);
+            }
+        }
+
+        function updateHistoryUI() {
+            const history = loadHistory();
+            const today = getTodayKey();
+
+            // 오늘 횟수 업데이트
+            const todayData = history[today];
+            elements.todayCount.textContent = todayData ? todayData.count : 0;
+
+            // 기록 목록 업데이트
+            const sortedDates = Object.keys(history).sort().reverse();
+
+            if (sortedDates.length === 0) {
+                elements.historyList.innerHTML = '';
+                elements.noHistory.classList.remove('hidden');
+                return;
+            }
+
+            elements.noHistory.classList.add('hidden');
+
+            elements.historyList.innerHTML = sortedDates.slice(0, 30).map(date => {
+                const data = history[date];
+                const dateObj = new Date(date);
+                const isToday = date === today;
+
+                const formattedDate = dateObj.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+
+                return `
+                    <div class="history-card rounded-xl p-4 ${isToday ? 'border-2 border-ocean-300' : ''}">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-medium text-sage-700">
+                                    ${isToday ? '📅 오늘' : formattedDate}
+                                </p>
+                                ${!isToday ? `<p class="text-xs text-sage-400">${formattedDate}</p>` : ''}
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-ocean-500">${data.count}</p>
+                                <p class="text-xs text-sage-400">회 연습</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== 이벤트 리스너 ====================
+        elements.startBtn.addEventListener('click', startBreathing);
+        elements.stopBtn.addEventListener('click', stopBreathing);
+        elements.volumeSlider.addEventListener('input', (e) => {
+            updateVolume(parseInt(e.target.value));
+        });
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHistoryUI();
+            updateCircleSize(0.5);
+        });
+
+        // 페이지 언로드 시 오디오 정리
+        window.addEventListener('beforeunload', () => {
+            if (state.audioContext) {
+                state.audioContext.close();
+            }
+        });
+    </script>
+</body>
+</html>
