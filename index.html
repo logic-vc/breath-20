@@ -1,784 +1,266 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>호흡 연습 - Breathing Exercise</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        sage: {
-                            50: '#f6f7f6',
-                            100: '#e3e7e3',
-                            200: '#c7d0c7',
-                            300: '#a3b1a3',
-                            400: '#7d8f7d',
-                            500: '#627362',
-                            600: '#4d5c4d',
-                            700: '#404b40',
-                            800: '#363e36',
-                            900: '#2e352e',
-                        },
-                        ocean: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#b9e5fe',
-                            300: '#7cd3fd',
-                            400: '#36bffa',
-                            500: '#0ca5eb',
-                            600: '#0084c9',
-                            700: '#0169a3',
-                            800: '#065986',
-                            900: '#0b4a6f',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
-
-        * {
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #e8f4f8 0%, #d4e8e4 50%, #e8ece4 100%);
-            min-height: 100vh;
-        }
-
-        /* 메인 호흡 원 */
-        .breath-circle {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #7cd3fd 0%, #36bffa 50%, #0ca5eb 100%);
-            box-shadow:
-                0 0 60px rgba(54, 191, 250, 0.4),
-                0 0 100px rgba(54, 191, 250, 0.2),
-                inset 0 0 40px rgba(255, 255, 255, 0.3);
-            transition: transform 0.1s ease-out;
-        }
-
-        .breath-circle::before {
-            content: '';
-            position: absolute;
-            top: 10%;
-            left: 15%;
-            width: 30%;
-            height: 20%;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            filter: blur(10px);
-        }
-
-        /* 물결 효과 */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px solid rgba(54, 191, 250, 0.4);
-            animation: ripple-animation 3s ease-out infinite;
-            pointer-events: none;
-        }
-
-        .ripple:nth-child(1) { animation-delay: 0s; }
-        .ripple:nth-child(2) { animation-delay: 1s; }
-        .ripple:nth-child(3) { animation-delay: 2s; }
-
-        @keyframes ripple-animation {
-            0% {
-                width: 100%;
-                height: 100%;
-                opacity: 0.6;
-                top: 0%;
-                left: 0%;
-            }
-            100% {
-                width: 200%;
-                height: 200%;
-                opacity: 0;
-                top: -50%;
-                left: -50%;
-            }
-        }
-
-        /* 호흡 단계별 색상 */
-        .inhale .breath-circle {
-            background: linear-gradient(135deg, #7cd3fd 0%, #36bffa 50%, #0ca5eb 100%);
-        }
-
-        .hold .breath-circle {
-            background: linear-gradient(135deg, #a3b1a3 0%, #7d8f7d 50%, #627362 100%);
-        }
-
-        .exhale .breath-circle {
-            background: linear-gradient(135deg, #c7d0c7 0%, #a3b1a3 50%, #7d8f7d 100%);
-        }
-
-        /* 버튼 애니메이션 */
-        .btn-breathing {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .btn-breathing::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
-        }
-
-        .btn-breathing:active::after {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-breathing:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(54, 191, 250, 0.3);
-        }
-
-        /* 기록 카드 */
-        .history-card {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
-        }
-
-        .history-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 진행 바 */
-        .progress-bar {
-            background: linear-gradient(90deg, #36bffa, #0ca5eb);
-            transition: width 0.1s linear;
-        }
-
-        /* 페이드 애니메이션 */
-        .fade-in {
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 카운트다운 애니메이션 */
-        .countdown-number {
-            animation: countdownPulse 1s ease-in-out;
-        }
-
-        @keyframes countdownPulse {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* 스크롤바 스타일 */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(54, 191, 250, 0.5);
-            border-radius: 3px;
-        }
-
-        /* 볼륨 슬라이더 */
-        .volume-slider {
-            -webkit-appearance: none;
-            width: 100px;
-            height: 4px;
-            border-radius: 2px;
-            background: rgba(54, 191, 250, 0.3);
-            outline: none;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #36bffa;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .volume-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>숨결 — 느린 호흡 트레이너</title>
+  <meta name="description" content="눈을 감고 소리만 따라가도 되는 느린 호흡(20·3·20) 트레이너. 오프라인, 계정 없이.">
+  <meta name="theme-color" content="#0b1719">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="숨결">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <!-- 헤더 -->
-        <header class="text-center mb-8 fade-in">
-            <h1 class="text-3xl md:text-4xl font-semibold text-sage-700 mb-2">
-                🌿 호흡 연습
-            </h1>
-            <p class="text-sage-500 text-sm md:text-base">
-                마음을 가라앉히고, 깊은 호흡으로 평온을 찾아보세요
-            </p>
-        </header>
+<body data-phase="idle" data-mode="idle">
+  <!-- 배경 레이어 -->
+  <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <canvas id="field" class="field" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
 
-        <!-- 오늘의 기록 배지 -->
-        <div class="flex justify-center mb-6 fade-in" style="animation-delay: 0.1s;">
-            <div class="bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
-                <span class="text-sage-600 font-medium">오늘의 연습: </span>
-                <span id="todayCount" class="text-ocean-600 font-bold text-xl">0</span>
-                <span class="text-sage-500">회</span>
-            </div>
-        </div>
-
-        <!-- 메인 호흡 영역 -->
-        <div id="breathingArea" class="flex flex-col items-center justify-center py-8 md:py-12">
-            <!-- 상태 텍스트 -->
-            <div id="statusText" class="text-center mb-8 h-20">
-                <p id="phaseText" class="text-2xl md:text-3xl font-medium text-sage-700 mb-2">
-                    준비되셨나요?
-                </p>
-                <p id="timerText" class="text-4xl md:text-5xl font-light text-ocean-500">
-
-                </p>
-            </div>
-
-            <!-- 호흡 원 컨테이너 -->
-            <div class="relative flex items-center justify-center" style="width: 300px; height: 300px;">
-                <div id="breathCircle" class="breath-circle flex items-center justify-center">
-                    <div class="ripple"></div>
-                    <div class="ripple"></div>
-                    <div class="ripple"></div>
-                </div>
-            </div>
-
-            <!-- 진행 바 -->
-            <div class="w-full max-w-md mt-8 mb-4">
-                <div class="h-2 bg-white/50 rounded-full overflow-hidden shadow-inner">
-                    <div id="progressBar" class="progress-bar h-full rounded-full" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between text-xs text-sage-500 mt-1">
-                    <span>흡기 20초</span>
-                    <span>홀딩 3초</span>
-                    <span>뱉기 20초</span>
-                </div>
-            </div>
-
-            <!-- 컨트롤 버튼 -->
-            <div class="flex gap-4 mt-6">
-                <button id="startBtn" class="btn-breathing bg-gradient-to-r from-ocean-400 to-ocean-500 text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg">
-                    시작하기
-                </button>
-                <button id="stopBtn" class="btn-breathing bg-gradient-to-r from-sage-400 to-sage-500 text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg hidden">
-                    중지
-                </button>
-            </div>
-
-            <!-- 볼륨 컨트롤 -->
-            <div class="flex items-center gap-3 mt-6 text-sage-500">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"/>
-                </svg>
-                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="30">
-                <span id="volumeValue" class="text-sm w-8">30%</span>
-            </div>
-        </div>
-
-        <!-- 연습 기록 -->
-        <div class="mt-8 fade-in" style="animation-delay: 0.2s;">
-            <h2 class="text-xl font-semibold text-sage-700 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-                연습 기록
-            </h2>
-            <div id="historyList" class="grid gap-3 max-h-64 overflow-y-auto pr-2">
-                <!-- 기록이 여기에 표시됩니다 -->
-            </div>
-            <p id="noHistory" class="text-center text-sage-400 py-8 hidden">
-                아직 연습 기록이 없습니다.<br>첫 번째 호흡 연습을 시작해보세요!
-            </p>
-        </div>
-
-        <!-- 푸터 -->
-        <footer class="text-center mt-12 pb-4 text-sage-400 text-sm">
-            <p>매일 조금씩, 마음의 평화를 찾아가세요 🍃</p>
-        </footer>
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">숨결</span>
     </div>
-
-    <script>
-        // ==================== 상태 관리 ====================
-        const state = {
-            isRunning: false,
-            isPaused: false,
-            currentPhase: 'idle', // idle, countdown, inhale, hold, exhale, complete
-            phaseTime: 0,
-            totalTime: 0,
-            animationFrame: null,
-            startTime: null,
-            audioContext: null,
-            oscillators: [],
-            gainNodes: [],
-            volume: 0.3
-        };
-
-        // 호흡 사이클 설정
-        const CYCLE = {
-            countdown: 3,
-            inhale: 20,
-            hold: 3,
-            exhale: 20,
-            get total() { return this.inhale + this.hold + this.exhale; }
-        };
-
-        // ==================== DOM 요소 ====================
-        const elements = {
-            startBtn: document.getElementById('startBtn'),
-            stopBtn: document.getElementById('stopBtn'),
-            breathCircle: document.getElementById('breathCircle'),
-            breathingArea: document.getElementById('breathingArea'),
-            phaseText: document.getElementById('phaseText'),
-            timerText: document.getElementById('timerText'),
-            progressBar: document.getElementById('progressBar'),
-            todayCount: document.getElementById('todayCount'),
-            historyList: document.getElementById('historyList'),
-            noHistory: document.getElementById('noHistory'),
-            volumeSlider: document.getElementById('volumeSlider'),
-            volumeValue: document.getElementById('volumeValue')
-        };
-
-        // ==================== 오디오 (Web Audio API) ====================
-        function initAudio() {
-            if (state.audioContext) return;
-
-            state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        function createAmbientSound() {
-            if (!state.audioContext) initAudio();
-
-            const ctx = state.audioContext;
-
-            // 여러 층의 부드러운 사운드 생성
-            const frequencies = [
-                { freq: 174, type: 'sine', gain: 0.15 },      // 기본 베이스
-                { freq: 261.63, type: 'sine', gain: 0.08 },  // C4
-                { freq: 329.63, type: 'sine', gain: 0.06 },  // E4
-                { freq: 392, type: 'sine', gain: 0.05 },     // G4
-                { freq: 523.25, type: 'sine', gain: 0.03 },  // C5 (하모닉스)
-            ];
-
-            frequencies.forEach(({ freq, type, gain }) => {
-                const oscillator = ctx.createOscillator();
-                const gainNode = ctx.createGain();
-                const filter = ctx.createBiquadFilter();
-
-                oscillator.type = type;
-                oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
-
-                // 부드러운 LFO로 미세한 떨림 효과
-                const lfo = ctx.createOscillator();
-                const lfoGain = ctx.createGain();
-                lfo.frequency.setValueAtTime(0.1 + Math.random() * 0.2, ctx.currentTime);
-                lfoGain.gain.setValueAtTime(2, ctx.currentTime);
-                lfo.connect(lfoGain);
-                lfoGain.connect(oscillator.frequency);
-                lfo.start();
-
-                // 로우패스 필터로 부드러운 소리
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(800, ctx.currentTime);
-                filter.Q.setValueAtTime(1, ctx.currentTime);
-
-                // 페이드 인
-                gainNode.gain.setValueAtTime(0, ctx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(gain * state.volume, ctx.currentTime + 2);
-
-                oscillator.connect(filter);
-                filter.connect(gainNode);
-                gainNode.connect(ctx.destination);
-
-                oscillator.start();
-
-                state.oscillators.push(oscillator);
-                state.oscillators.push(lfo);
-                state.gainNodes.push(gainNode);
-            });
-
-            // 화이트 노이즈 (바람 소리 효과)
-            const bufferSize = 2 * ctx.sampleRate;
-            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-
-            for (let i = 0; i < bufferSize; i++) {
-                output[i] = Math.random() * 2 - 1;
-            }
-
-            const whiteNoise = ctx.createBufferSource();
-            whiteNoise.buffer = noiseBuffer;
-            whiteNoise.loop = true;
-
-            const noiseFilter = ctx.createBiquadFilter();
-            noiseFilter.type = 'lowpass';
-            noiseFilter.frequency.setValueAtTime(200, ctx.currentTime);
-
-            const noiseGain = ctx.createGain();
-            noiseGain.gain.setValueAtTime(0, ctx.currentTime);
-            noiseGain.gain.linearRampToValueAtTime(0.02 * state.volume, ctx.currentTime + 2);
-
-            whiteNoise.connect(noiseFilter);
-            noiseFilter.connect(noiseGain);
-            noiseGain.connect(ctx.destination);
-
-            whiteNoise.start();
-
-            state.oscillators.push(whiteNoise);
-            state.gainNodes.push(noiseGain);
-        }
-
-        function stopAudio() {
-            const ctx = state.audioContext;
-            if (!ctx) return;
-
-            // 페이드 아웃
-            state.gainNodes.forEach(gainNode => {
-                gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
-            });
-
-            // 1초 후 오실레이터 정지
-            setTimeout(() => {
-                state.oscillators.forEach(osc => {
-                    try { osc.stop(); } catch (e) {}
-                });
-                state.oscillators = [];
-                state.gainNodes = [];
-            }, 1000);
-        }
-
-        function updateVolume(value) {
-            state.volume = value / 100;
-            elements.volumeValue.textContent = `${value}%`;
-
-            // 실행 중이면 볼륨 업데이트
-            if (state.isRunning && state.gainNodes.length > 0) {
-                const ctx = state.audioContext;
-                const baseGains = [0.15, 0.08, 0.06, 0.05, 0.03, 0.02];
-                state.gainNodes.forEach((gainNode, i) => {
-                    const baseGain = baseGains[Math.min(i, baseGains.length - 1)];
-                    gainNode.gain.linearRampToValueAtTime(baseGain * state.volume, ctx.currentTime + 0.1);
-                });
-            }
-        }
-
-        // ==================== 애니메이션 ====================
-        function updateCircleSize(progress) {
-            // progress: 0 = 최소 크기, 1 = 최대 크기
-            const minScale = 0.6;
-            const maxScale = 1.5;
-            const scale = minScale + (maxScale - minScale) * progress;
-
-            elements.breathCircle.style.transform = `scale(${scale})`;
-        }
-
-        function setPhaseClass(phase) {
-            elements.breathingArea.classList.remove('inhale', 'hold', 'exhale');
-            if (phase === 'inhale' || phase === 'hold' || phase === 'exhale') {
-                elements.breathingArea.classList.add(phase);
-            }
-        }
-
-        // ==================== 타이머 로직 ====================
-        function startBreathing() {
-            if (state.isRunning) return;
-
-            state.isRunning = true;
-            state.currentPhase = 'countdown';
-            state.phaseTime = CYCLE.countdown;
-            state.totalTime = 0;
-
-            elements.startBtn.classList.add('hidden');
-            elements.stopBtn.classList.remove('hidden');
-
-            // 오디오 초기화 및 재생
-            initAudio();
-            if (state.audioContext.state === 'suspended') {
-                state.audioContext.resume();
-            }
-            createAmbientSound();
-
-            runCountdown();
-        }
-
-        function runCountdown() {
-            let count = CYCLE.countdown;
-
-            elements.phaseText.textContent = '준비';
-            elements.timerText.innerHTML = `<span class="countdown-number">${count}</span>`;
-            elements.timerText.classList.add('text-6xl');
-
-            const countdownInterval = setInterval(() => {
-                count--;
-
-                if (count > 0) {
-                    elements.timerText.innerHTML = `<span class="countdown-number">${count}</span>`;
-                } else {
-                    clearInterval(countdownInterval);
-                    elements.timerText.classList.remove('text-6xl');
-                    startBreathCycle();
-                }
-            }, 1000);
-
-            state.countdownInterval = countdownInterval;
-        }
-
-        function startBreathCycle() {
-            state.currentPhase = 'inhale';
-            state.startTime = performance.now();
-            state.phaseTime = 0;
-
-            requestAnimationFrame(updateBreathing);
-        }
-
-        function updateBreathing(timestamp) {
-            if (!state.isRunning) return;
-
-            const elapsed = (timestamp - state.startTime) / 1000;
-
-            let phase, phaseElapsed, phaseTotal, circleProgress;
-
-            if (elapsed < CYCLE.inhale) {
-                // 흡기
-                phase = 'inhale';
-                phaseElapsed = elapsed;
-                phaseTotal = CYCLE.inhale;
-                circleProgress = elapsed / CYCLE.inhale;
-            } else if (elapsed < CYCLE.inhale + CYCLE.hold) {
-                // 홀딩
-                phase = 'hold';
-                phaseElapsed = elapsed - CYCLE.inhale;
-                phaseTotal = CYCLE.hold;
-                circleProgress = 1;
-            } else if (elapsed < CYCLE.total) {
-                // 뱉기
-                phase = 'exhale';
-                phaseElapsed = elapsed - CYCLE.inhale - CYCLE.hold;
-                phaseTotal = CYCLE.exhale;
-                circleProgress = 1 - (phaseElapsed / CYCLE.exhale);
-            } else {
-                // 완료
-                completeBreathing();
-                return;
-            }
-
-            // UI 업데이트
-            const phaseNames = {
-                inhale: '들이쉬기',
-                hold: '멈추기',
-                exhale: '내쉬기'
-            };
-
-            const remaining = Math.ceil(phaseTotal - phaseElapsed);
-
-            if (state.currentPhase !== phase) {
-                state.currentPhase = phase;
-                setPhaseClass(phase);
-            }
-
-            elements.phaseText.textContent = phaseNames[phase];
-            elements.timerText.textContent = remaining;
-
-            // 원 크기 업데이트 (부드러운 easing)
-            const easedProgress = easeInOutCubic(circleProgress);
-            updateCircleSize(easedProgress);
-
-            // 진행 바 업데이트
-            const totalProgress = (elapsed / CYCLE.total) * 100;
-            elements.progressBar.style.width = `${totalProgress}%`;
-
-            state.animationFrame = requestAnimationFrame(updateBreathing);
-        }
-
-        function easeInOutCubic(t) {
-            return t < 0.5
-                ? 4 * t * t * t
-                : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        }
-
-        function completeBreathing() {
-            state.isRunning = false;
-            state.currentPhase = 'complete';
-
-            // 기록 저장
-            saveExercise();
-
-            // UI 리셋
-            elements.phaseText.textContent = '완료!';
-            elements.timerText.textContent = '🎉';
-            elements.progressBar.style.width = '100%';
-
-            // 오디오 정지
-            stopAudio();
-
-            // 2초 후 리셋
-            setTimeout(() => {
-                resetUI();
-            }, 2000);
-        }
-
-        function stopBreathing() {
-            state.isRunning = false;
-
-            if (state.countdownInterval) {
-                clearInterval(state.countdownInterval);
-            }
-
-            if (state.animationFrame) {
-                cancelAnimationFrame(state.animationFrame);
-            }
-
-            stopAudio();
-            resetUI();
-        }
-
-        function resetUI() {
-            state.currentPhase = 'idle';
-
-            elements.startBtn.classList.remove('hidden');
-            elements.stopBtn.classList.add('hidden');
-            elements.phaseText.textContent = '준비되셨나요?';
-            elements.timerText.textContent = '';
-            elements.progressBar.style.width = '0%';
-
-            updateCircleSize(0.5);
-            setPhaseClass('idle');
-        }
-
-        // ==================== 기록 저장 (localStorage) ====================
-        function getStorageKey() {
-            return 'breathingExerciseHistory';
-        }
-
-        function getTodayKey() {
-            return new Date().toISOString().split('T')[0];
-        }
-
-        function loadHistory() {
-            try {
-                const data = localStorage.getItem(getStorageKey());
-                return data ? JSON.parse(data) : {};
-            } catch (e) {
-                console.error('기록 로드 실패:', e);
-                return {};
-            }
-        }
-
-        function saveExercise() {
-            const history = loadHistory();
-            const today = getTodayKey();
-
-            if (!history[today]) {
-                history[today] = { count: 0, times: [] };
-            }
-
-            history[today].count++;
-            history[today].times.push(new Date().toISOString());
-
-            try {
-                localStorage.setItem(getStorageKey(), JSON.stringify(history));
-                updateHistoryUI();
-            } catch (e) {
-                console.error('기록 저장 실패:', e);
-            }
-        }
-
-        function updateHistoryUI() {
-            const history = loadHistory();
-            const today = getTodayKey();
-
-            // 오늘 횟수 업데이트
-            const todayData = history[today];
-            elements.todayCount.textContent = todayData ? todayData.count : 0;
-
-            // 기록 목록 업데이트
-            const sortedDates = Object.keys(history).sort().reverse();
-
-            if (sortedDates.length === 0) {
-                elements.historyList.innerHTML = '';
-                elements.noHistory.classList.remove('hidden');
-                return;
-            }
-
-            elements.noHistory.classList.add('hidden');
-
-            elements.historyList.innerHTML = sortedDates.slice(0, 30).map(date => {
-                const data = history[date];
-                const dateObj = new Date(date);
-                const isToday = date === today;
-
-                const formattedDate = dateObj.toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'short'
-                });
-
-                return `
-                    <div class="history-card rounded-xl p-4 ${isToday ? 'border-2 border-ocean-300' : ''}">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-sage-700">
-                                    ${isToday ? '📅 오늘' : formattedDate}
-                                </p>
-                                ${!isToday ? `<p class="text-xs text-sage-400">${formattedDate}</p>` : ''}
-                            </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-bold text-ocean-500">${data.count}</p>
-                                <p class="text-xs text-sage-400">회 연습</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ==================== 이벤트 리스너 ====================
-        elements.startBtn.addEventListener('click', startBreathing);
-        elements.stopBtn.addEventListener('click', stopBreathing);
-        elements.volumeSlider.addEventListener('input', (e) => {
-            updateVolume(parseInt(e.target.value));
-        });
-
-        // 초기화
-        document.addEventListener('DOMContentLoaded', () => {
-            updateHistoryUI();
-            updateCircleSize(0.5);
-        });
-
-        // 페이지 언로드 시 오디오 정리
-        window.addEventListener('beforeunload', () => {
-            if (state.audioContext) {
-                state.audioContext.close();
-            }
-        });
-    </script>
+    <div class="chips">
+      <span class="chip" title="오늘 완료한 호흡 사이클">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>
+        오늘 <b id="todayCount">0</b>회
+      </span>
+      <span class="chip" title="연속으로 연습한 날">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3 4 6 6.2 6 10a6 6 0 0 1-12 0c0-2.4 1.3-4 2.6-5.3.3 1.6 1.2 2.6 2.4 3C10.4 7.8 11 5.2 12 3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <b id="streakCount">0</b>일 연속
+      </span>
+    </div>
+  </header>
+
+  <!-- 세션 상단 바 (몰입 모드) -->
+  <div class="session-bar" aria-hidden="true">
+    <button class="icon-btn" id="stopBtn" aria-label="세션 종료">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <p class="session-meta" id="sessionMeta">20·3·20 · 3 사이클</p>
+    <div class="session-actions">
+      <button class="icon-btn" id="soundBtn" aria-label="소리 끄기" aria-pressed="true">
+        <svg class="on" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg class="off" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" id="pauseBtn" aria-label="일시정지">
+        <svg class="pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/></svg>
+        <svg class="play" viewBox="0 0 24 24"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <main id="main">
+    <!-- ============ 호흡 ============ -->
+    <section class="view view-breathe" id="view-breathe" aria-labelledby="greetTitle">
+      <div class="greet">
+        <p class="eyebrow" id="greetEyebrow">편안한 저녁이에요</p>
+        <h1 id="greetTitle">오늘도 천천히,<br>한 숨씩.</h1>
+      </div>
+
+      <div class="stage" id="stage">
+        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="ring-track" cx="50" cy="50" r="48"/>
+          <circle class="ring-seg seg-inhale" cx="50" cy="50" r="48"/>
+          <circle class="ring-seg seg-hold" cx="50" cy="50" r="48"/>
+          <circle class="ring-seg seg-exhale" cx="50" cy="50" r="48"/>
+          <circle class="ring-progress" id="ringProgress" cx="50" cy="50" r="48"/>
+          <circle class="ring-head" id="ringHead" cx="50" cy="2" r="1.4"/>
+        </svg>
+        <button class="stage-hit" id="orbStart" aria-label="호흡 시작"></button>
+        <div class="orb-wrap" id="orbWrap">
+          <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
+          <div class="halo"></div>
+          <div class="orb"></div>
+        </div>
+        <div class="readout">
+          <p class="phase" id="phaseText">준비되셨나요?</p>
+          <p class="count" id="countText">20·3·20</p>
+          <p class="sub" id="subText">들숨 20 · 멈춤 3 · 날숨 20</p>
+          <span class="tap-hint" aria-hidden="true">눌러서 시작</span>
+        </div>
+
+      </div>
+
+      <p class="session-note" id="sessionNote">숨이 버거우면 언제든 평소대로 쉬어도 괜찮아요</p>
+
+      <div class="panel controls">
+        <div class="field-group">
+          <div class="field-head">
+            <span class="label">호흡 리듬</span>
+            <span class="hint">들숨 · 멈춤 · 날숨 (초)</span>
+          </div>
+          <div class="segmented" id="rhythmPicker" role="radiogroup" aria-label="호흡 리듬"></div>
+        </div>
+        <div class="field-group">
+          <div class="field-head">
+            <span class="label">반복</span>
+            <span class="hint" id="totalTime">약 2분 9초</span>
+          </div>
+          <div class="pills" id="cyclePicker" role="radiogroup" aria-label="반복 사이클 수"></div>
+        </div>
+        <button class="btn-primary" id="startBtn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
+          호흡 시작
+        </button>
+        <p class="tip">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 18 20 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          눈을 감아도 소리가 단계를 알려줘요
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 기록 ============ -->
+    <section class="view view-journey" id="view-journey" hidden aria-labelledby="journeyTitle">
+      <div class="view-head">
+        <p class="eyebrow">나의 숨길</p>
+        <h2 id="journeyTitle">기록</h2>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>최근 12주</h3>
+          <div class="legend" aria-hidden="true">
+            <span>적게</span><i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><span>많이</span>
+          </div>
+        </div>
+        <div class="heatmap-wrap">
+          <div class="heatmap" id="heatmap"></div>
+          <div class="tooltip" id="heatTip" role="status" hidden></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>숨길 사다리</h3>
+          <span class="hint">같은 단계 3번 완주 시 다음 단계 추천</span>
+        </div>
+        <ol class="ladder" id="ladder"></ol>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>날짜별 기록</h3>
+          <span class="hint" id="recordCount"></span>
+        </div>
+        <ul class="records" id="records"></ul>
+        <p class="empty" id="emptyRecords" hidden>아직 기록이 없어요.<br>첫 번째 숨을 시작해 볼까요?</p>
+      </div>
+    </section>
+
+    <!-- ============ 설정 ============ -->
+    <section class="view view-settings" id="view-settings" hidden aria-labelledby="settingsTitle">
+      <div class="view-head">
+        <p class="eyebrow">나에게 맞게</p>
+        <h2 id="settingsTitle">설정</h2>
+      </div>
+
+      <div class="panel list">
+        <div class="row">
+          <div class="row-text"><b>배경 사운드</b><span>호흡에 맞춰 함께 숨 쉬는 앰비언트</span></div>
+          <div class="volume">
+            <input type="range" id="volume" min="0" max="100" step="1" aria-label="배경 사운드 볼륨">
+            <output id="volumeOut">60</output>
+          </div>
+        </div>
+        <label class="row">
+          <div class="row-text"><b>단계 전환 차임</b><span>들숨 ↑ · 멈춤 · 날숨 ↓ 음정으로 알림</span></div>
+          <input type="checkbox" class="switch" id="optChime" role="switch">
+        </label>
+        <label class="row">
+          <div class="row-text"><b>진동</b><span>단계마다 다른 진동 패턴 (Android)</span></div>
+          <input type="checkbox" class="switch" id="optHaptics" role="switch">
+        </label>
+        <label class="row">
+          <div class="row-text"><b>마음 체크인</b><span>세션 전후 마음 상태를 기록</span></div>
+          <input type="checkbox" class="switch" id="optCheckin" role="switch">
+        </label>
+        <label class="row">
+          <div class="row-text"><b>화면 켜짐 유지</b><span>연습 중 화면이 꺼지지 않게</span></div>
+          <input type="checkbox" class="switch" id="optWake" role="switch">
+        </label>
+      </div>
+
+      <div class="panel list">
+        <div class="row">
+          <div class="row-text"><b>기록 내보내기</b><span>JSON 파일로 백업</span></div>
+          <button class="btn-ghost" id="exportBtn">내보내기</button>
+        </div>
+        <div class="row">
+          <div class="row-text"><b>기록 초기화</b><span>이 기기의 모든 연습 기록 삭제</span></div>
+          <button class="btn-ghost danger" id="resetBtn">초기화</button>
+        </div>
+      </div>
+
+      <div class="panel about">
+        <p><b>안전 안내</b> 느린 호흡과 숨 멈춤은 사람에 따라 어지러움을 줄 수 있어요. 불편하면 즉시 멈추고 평소대로 숨 쉬세요. 숨결은 의료 기기가 아니에요.</p>
+        <p><b>프라이버시</b> 계정·서버·추적이 없어요. 모든 기록은 이 기기에만 저장돼요.</p>
+        <p class="version">숨결 v2.0</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 하단 탭 -->
+  <nav class="tabbar" aria-label="주요 메뉴">
+    <button class="tab" data-view="breathe" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+      <span>호흡</span>
+    </button>
+    <button class="tab" data-view="journey">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8" fill="currentColor"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8" fill="currentColor"/></svg>
+      <span>기록</span>
+    </button>
+    <button class="tab" data-view="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="15" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>설정</span>
+    </button>
+  </nav>
+
+  <!-- 시트: 체크인 / 요약 / 온보딩 -->
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <div class="sheet" id="checkinSheet" role="dialog" aria-modal="true" aria-labelledby="checkinTitle" hidden>
+    <p class="eyebrow" id="checkinEyebrow">시작 전</p>
+    <h3 id="checkinTitle">지금 마음은 어떤가요?</h3>
+    <div class="moods" id="moods"></div>
+    <button class="btn-text" id="checkinSkip">건너뛰기</button>
+  </div>
+
+  <div class="sheet" id="summarySheet" role="dialog" aria-modal="true" aria-labelledby="summaryTitle" hidden>
+    <div class="summary-orb" aria-hidden="true"></div>
+    <h3 id="summaryTitle">수고했어요</h3>
+    <p class="summary-lead" id="summaryLead"></p>
+    <div class="summary-stats" id="summaryStats"></div>
+    <div class="delta" id="summaryDelta" hidden></div>
+    <div class="levelup" id="levelUp" hidden></div>
+    <button class="btn-primary" id="summaryDone">완료</button>
+  </div>
+
+  <div class="sheet" id="onboardSheet" role="dialog" aria-modal="true" aria-labelledby="onboardTitle" hidden>
+    <div class="summary-orb" aria-hidden="true"></div>
+    <p class="eyebrow">숨결에 오신 걸 환영해요</p>
+    <h3 id="onboardTitle">눈을 감고,<br>소리를 따라 숨 쉬세요</h3>
+    <ul class="usp">
+      <li><i class="dot mint"></i><div><b>함께 숨 쉬는 소리</b><span>들숨엔 밝아지고 날숨엔 잔잔해지는 사운드와 차임이 단계를 알려줘요.</span></div></li>
+      <li><i class="dot lav"></i><div><b>숨길 사다리</b><span>6초 들숨부터 시작해 20초 들숨까지 단계별로 늘려가요.</span></div></li>
+      <li><i class="dot peach"></i><div><b>마음 변화 기록</b><span>연습 전후의 마음을 기록해 나에게 맞는지 확인해요.</span></div></li>
+    </ul>
+    <p class="safety">불편하거나 어지러우면 즉시 멈추고 평소대로 숨 쉬세요.</p>
+    <button class="btn-primary" id="onboardDone">시작하기</button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="announcer" aria-live="assertive"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
