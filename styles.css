@@ -241,6 +241,7 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 .about { display: grid; gap: 10px; font-size: 13px; color: var(--ink-3); line-height: 1.6; }
 .about b { color: var(--ink-2); margin-right: 6px; }
 .version { font-size: 12px; }
+.version a { color: var(--ink-2); text-underline-offset: 3px; }
 
 /* ---------- 시트 ---------- */
 .backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(27, 31, 42, .35); animation: fade .3s var(--ease) both; }
