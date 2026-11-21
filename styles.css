@@ -4,7 +4,7 @@
    - 호흡: 가운데 형태가 부풀고 꺼진다. 색은 블루 → 주황(가득) → 블루
    ========================================================================== */
 
-@property --lvl { syntax: '<number>'; inherits: true; initial-value: 0.3; }
+@property --lvl { syntax: '<number>'; inherits: true; initial-value: 0.22; }
 
 :root {
   --bg: #FFFFFF;
@@ -23,7 +23,7 @@
   --orange: #F97F34;
 
   --p: 0;
-  --lvl: .3;
+  --lvl: .22;
 
   --radius: 20px;
   --radius-sm: 14px;
@@ -61,7 +61,7 @@ svg { display: block; }
 /* ---------- 상단 바 ---------- */
 .topbar { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1080px; margin: 0 auto; padding: calc(14px + var(--safe-t)) calc(20px + var(--safe-r)) 4px calc(20px + var(--safe-l)); }
 .brand { display: flex; align-items: center; gap: 9px; }
-.brand-mark { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--blue) 20%, var(--orange) 90%); }
+.brand-mark { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(180deg, #fff 0 38%, var(--blue) 38% 62%, var(--coral) 62% 82%, var(--orange) 82%); box-shadow: inset 0 0 0 1.5px var(--line-2); }
 .brand-name { font-weight: 800; font-size: 19px; letter-spacing: -0.03em; }
 .chips { display: flex; gap: 14px; }
 .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
@@ -82,41 +82,42 @@ h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
 .view-head { padding: 6px 0 4px; }
 
 /* ==========================================================================
-   부푸는 형태 (호흡 화면 · 홈 미리보기 공용)
+   물: 아래에서 차오르는 수위 + 잔잔한 물결 (호흡 화면 · 홈 카드 공용)
+   --lvl: 수위(0~1), --p: 숨 진행도(색)
    ========================================================================== */
-.bloom { position: relative; width: var(--bsize, min(88vw, 52dvh, 520px)); aspect-ratio: 1; }
-.bloom > span { position: absolute; inset: 0; border-radius: 50%; }
-.bloom .guide { border: 1.5px dashed var(--line-2); transform: scale(.8); } /* 가득 찼을 때의 크기 */
-.bloom .orb { background: var(--orb); transform: scale(var(--lvl)); will-change: transform; }
-.bloom .halo { background: color-mix(in oklch, var(--orb) 20%, transparent); transform: scale(calc(var(--lvl) * 1.17)); }
-.bloom .halo.h2 { background: color-mix(in oklch, var(--orb) 10%, transparent); transform: scale(calc(var(--lvl) * 1.36)); }
-
-/* 블롭: 가장자리가 살아 숨 쉬듯 일렁인다 */
-body[data-shape="blob"] .bloom .orb,
-body[data-shape="blob"] .bloom .halo { animation: morph 9s ease-in-out infinite; }
-body[data-shape="blob"] .bloom .halo.h1 { animation-duration: 11s; animation-delay: -3s; }
-body[data-shape="blob"] .bloom .halo.h2 { animation-duration: 13s; animation-delay: -6s; }
-@keyframes morph {
-  0%, 100% { border-radius: 58% 42% 52% 48% / 46% 58% 42% 54%; }
-  25% { border-radius: 44% 56% 41% 59% / 58% 44% 56% 42%; }
-  50% { border-radius: 56% 44% 60% 40% / 42% 52% 48% 58%; }
-  75% { border-radius: 42% 58% 54% 46% / 56% 42% 58% 44%; }
+.water {
+  --orb: color-mix(in oklch, var(--orange) calc(clamp(0, var(--p) * 3 - 2, 1) * 100%),
+           color-mix(in oklch, var(--coral) calc(clamp(0, var(--p) * 3 - 1, 1) * 100%),
+             color-mix(in oklch, var(--lav) calc(clamp(0, var(--p) * 3, 1) * 100%), var(--blue))));
+  position: absolute; left: 0; right: 0; bottom: 0; height: 100%;
+  background: var(--orb);
+  transform: translateY(calc((1 - var(--lvl)) * 100%));
+  will-change: transform;
 }
-body.paused .bloom > span { animation-play-state: paused; }
+/* 윗면의 물결 두 겹 (마스크로 파도 모양을 만들고 좌우로 천천히 흘린다) */
+.water::before, .water::after { content: ""; position: absolute; left: 0; right: 0; background: var(--orb); -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x; }
+.water::before { top: -16px; height: 17px; -webkit-mask-image: var(--wave); mask-image: var(--wave); -webkit-mask-size: 180px 17px; mask-size: 180px 17px; animation: wave-a 7s linear infinite; }
+.water::after { top: -24px; height: 20px; opacity: .38; -webkit-mask-image: var(--wave); mask-image: var(--wave); -webkit-mask-size: 260px 20px; mask-size: 260px 20px; animation: wave-b 11s linear infinite; }
+:root { --wave: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 20' preserveAspectRatio='none'><path d='M0 11 Q40 1 80 11 T160 11 V20 H0Z' fill='black'/></svg>"); }
+@keyframes wave-a { to { -webkit-mask-position-x: -180px; mask-position-x: -180px; } }
+@keyframes wave-b { from { -webkit-mask-position-x: -260px; mask-position-x: -260px; } to { -webkit-mask-position-x: 0; mask-position-x: 0; } }
+body.paused .water::before, body.paused .water::after { animation-play-state: paused; }
 
 /* ---------- 호흡 화면 ---------- */
-.breath-screen { position: fixed; inset: 0; z-index: 12; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; visibility: hidden; opacity: 0; transition: opacity .5s var(--ease), visibility 0s linear .5s; overflow: hidden; }
+.breath-screen { position: fixed; inset: 0; z-index: 12; background: #fff; overflow: hidden; visibility: hidden; opacity: 0; transition: opacity .5s var(--ease), visibility 0s linear .5s; }
 body[data-mode="session"] .breath-screen { visibility: visible; opacity: 1; transition: opacity .5s var(--ease); }
 body[data-mode="session"] { overflow: hidden; }
-body[data-phase="prep"] .breath-screen .orb, body[data-phase="prep"] .breath-screen .halo { transition: transform 2.6s var(--ease-soft); }
-.bs-text { text-align: center; min-height: 112px; }
-.phase { font-size: clamp(28px, 7.4vw, 36px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.2; }
+body[data-phase="prep"] .breath-screen .water { transition: transform 2.6s var(--ease-soft); }
+.bs-text { position: absolute; top: calc(84px + var(--safe-t)); left: 0; right: 0; text-align: center; z-index: 2; }
+.phase { font-size: clamp(32px, 8.4vw, 42px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.2; }
 .count { margin-top: 4px; font-size: clamp(44px, 12vw, 60px); font-weight: 300; color: var(--ink-2); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; line-height: 1.1; min-height: 1.1em; }
 .count.tick { animation: tick .8s var(--ease); }
 @keyframes tick { 0% { opacity: .35; transform: scale(.94); } 100% { opacity: 1; transform: none; } }
+.guide-line { position: absolute; left: 0; right: 0; bottom: 70%; border-top: 1.5px dashed var(--line-2); z-index: 1; }
+.guide-line span { position: absolute; right: 16px; top: 6px; font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
 .cycle-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--wash); z-index: 3; }
 .cycle-bar i { display: block; height: 100%; width: 0; background: var(--ink); border-radius: 0 3px 3px 0; }
-.session-note { position: absolute; left: 0; right: 0; bottom: calc(32px + var(--safe-b)); text-align: center; font-size: 13.5px; font-weight: 500; color: var(--ink-3); padding: 0 24px; }
+.session-note { position: absolute; left: 0; right: 0; bottom: calc(30px + var(--safe-b)); text-align: center; font-size: 13.5px; font-weight: 600; color: rgba(27,31,42,.7); padding: 0 24px; z-index: 2; }
 
 .session-bar { position: fixed; z-index: 20; left: 0; right: 0; top: 0; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px; max-width: 720px; margin: 0 auto; padding: calc(14px + var(--safe-t)) calc(14px + var(--safe-r)) 0 calc(14px + var(--safe-l)); opacity: 0; pointer-events: none; transition: opacity .4s var(--ease); }
 body[data-mode="session"] .session-bar { opacity: 1; pointer-events: auto; transition-delay: .2s; }
@@ -136,12 +137,12 @@ body[data-mode="session"] .tabbar { transform: translateY(110%); pointer-events:
 body[data-mode="session"] main { visibility: hidden; }
 
 /* ---------- 홈 ---------- */
-.preview { display: grid; place-items: center; --bsize: min(56vw, 232px); margin: 0; animation: idle-bloom 8s var(--ease-soft) infinite; }
-.preview .bloom .orb, .preview .bloom .halo { will-change: transform; }
-@keyframes idle-bloom { 0%, 100% { --lvl: .4; } 50% { --lvl: .62; } }
-.preview-meta { display: grid; justify-items: center; gap: 2px; text-align: center; }
-.preview-meta b { font-size: 19px; font-weight: 700; letter-spacing: -0.03em; }
-.preview-meta span { font-size: 13.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.hero { position: relative; height: 210px; border-radius: 28px; border: 1px solid var(--line); overflow: hidden; background: #fff; animation: idle-tide 9s var(--ease-soft) infinite; }
+@property --p { syntax: '<number>'; inherits: true; initial-value: 0; }
+@keyframes idle-tide { 0%, 100% { --lvl: .26; --p: 0; } 50% { --lvl: .56; --p: .95; } }
+.hero-text { position: absolute; top: 20px; left: 22px; right: 22px; z-index: 2; display: grid; gap: 2px; }
+.hero-text b { font-size: 21px; font-weight: 700; letter-spacing: -0.04em; }
+.hero-text span { font-size: 13.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .block { display: grid; gap: 10px; margin-top: 6px; }
 .field-head, .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .panel-head { margin-bottom: 14px; flex-wrap: wrap; }
@@ -250,11 +251,6 @@ input[type="range"]::-moz-range-track { height: 4px; border-radius: 4px; backgro
 input[type="range"]::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--ink); }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%; background: #fff; border: 1.5px solid var(--ink); box-shadow: 0 1px 6px rgba(0,0,0,.15); }
 input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 50%; background: #fff; }
-.shape-picker { display: flex; gap: 6px; flex: none; }
-.shape-picker button { display: flex; align-items: center; gap: 7px; padding: 8px 13px 8px 10px; border-radius: 999px; border: 1.5px solid var(--line); font-size: 13px; font-weight: 600; color: var(--ink-2); transition: all .2s var(--ease); }
-.shape-picker button[aria-checked="true"] { border-color: var(--ink); color: var(--ink); }
-.shape-picker i { width: 16px; height: 16px; background: linear-gradient(135deg, var(--blue), var(--orange)); display: block; }
-.s-circle { border-radius: 50%; } .s-blob { border-radius: 52% 48% 55% 45% / 46% 56% 44% 54%; }
 .about { display: grid; gap: 10px; font-size: 13px; color: var(--ink-3); line-height: 1.6; }
 .about b { color: var(--ink-2); margin-right: 6px; }
 .version { font-size: 12px; }
@@ -276,7 +272,7 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 @media (hover: hover) { .mood:hover { border-color: var(--line-2); } }
 .mood.picked { border-color: var(--ink); color: var(--ink); }
 
-.summary-orb { width: 84px; height: 84px; margin: 0 auto 16px; border-radius: 50%; background: linear-gradient(160deg, var(--blue) 10%, var(--lav) 40%, var(--coral) 70%, var(--orange)); animation: idle-breathe-sm 5s var(--ease-soft) infinite; }
+.summary-orb { width: 72px; height: 72px; margin: 0 auto 16px; border-radius: 22px; background: linear-gradient(180deg, #fff 0 20%, var(--blue) 20% 45%, var(--lav) 45% 62%, var(--coral) 62% 80%, var(--orange) 80%); box-shadow: inset 0 0 0 1.5px var(--line-2); animation: idle-breathe-sm 5s var(--ease-soft) infinite; }
 @keyframes idle-breathe-sm { 0%, 100% { transform: scale(.92); } 50% { transform: scale(1.05); } }
 .summary-lead, .welcome-sub { margin-top: 6px; color: var(--ink-2); font-size: 14.5px; }
 .summary-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; }
@@ -352,16 +348,12 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 }
 @media (min-width: 960px) {
   main { max-width: 560px; }
-  .breath-screen { gap: 36px; }
 }
 @media (max-height: 560px) and (orientation: landscape) {
-  .breath-screen { flex-direction: row; gap: 40px; }
-  .bloom { --bsize: min(70dvh, 40vw); }
+  .bs-text { top: 56px; } .phase { font-size: 26px; } .count { font-size: 34px; }
   .session-note { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .summary-orb, .preview { animation: none !important; }
-  .preview { --lvl: .5; }
-  body[data-shape="blob"] .bloom > span { animation: none !important; }
+  .summary-orb, 
   .view, .sheet { animation-duration: .01s !important; }
 }

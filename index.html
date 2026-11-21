@@ -19,7 +19,8 @@
   <!-- ============ 호흡 화면 (전체 화면) ============ -->
   <div class="breath-screen" id="breathScreen">
     <div class="cycle-bar" aria-hidden="true"><i id="cycleBar"></i></div>
-    <div class="bloom" aria-hidden="true"><span class="guide"></span><span class="halo h2"></span><span class="halo h1"></span><span class="orb"></span></div>
+    <div class="guide-line" aria-hidden="true"><span>가득</span></div>
+    <div class="water" aria-hidden="true"></div>
     <div class="bs-text">
       <p class="phase" id="phaseText">준비</p>
       <p class="count" id="countText"></p>
@@ -71,10 +72,10 @@
         <h1 id="greetTitle">오늘도 천천히,<br>한 숨씩.</h1>
       </div>
 
-      <div class="preview" aria-hidden="true">
-        <div class="bloom"><span class="guide"></span><span class="halo h2"></span><span class="halo h1"></span><span class="orb"></span></div>
+      <div class="hero" aria-hidden="true">
+        <div class="hero-text"><b id="heroTitle">기본 · 10·2·10</b><span id="heroMeta">3 사이클 · 약 1분</span></div>
+        <div class="water"></div>
       </div>
-      <p class="preview-meta"><b id="heroTitle">기본 · 10·2·10</b><span id="heroMeta">3 사이클 · 약 1분</span></p>
       <button class="btn-primary" id="startBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
         호흡 시작
@@ -186,13 +187,6 @@
             <output id="volumeOut">60</output>
           </div>
         </div>
-        <div class="row">
-          <div class="row-text"><b>호흡 모양</b><span>숨에 따라 부풀고 꺼지는 형태</span></div>
-          <div class="shape-picker" id="shapePicker" role="radiogroup" aria-label="호흡 모양">
-            <button role="radio" data-v="circle" aria-checked="true"><i class="s-circle"></i>원</button>
-            <button role="radio" data-v="blob" aria-checked="false"><i class="s-blob"></i>블롭</button>
-          </div>
-        </div>
         <label class="row">
           <div class="row-text"><b>단계 전환 차임</b><span>들숨 ↑ · 멈춤 · 날숨 ↓ 음정으로 알림</span></div>
           <input type="checkbox" class="switch" id="optChime" role="switch">
@@ -225,7 +219,7 @@
       <div class="panel about">
         <p><b>안전 안내</b> 느린 호흡과 숨 멈춤은 사람에 따라 어지러움을 줄 수 있어요. 불편하면 즉시 멈추고 평소대로 숨 쉬세요. 숨결은 의료 기기가 아니에요.</p>
         <p><b>프라이버시</b> 계정·서버·추적이 없어요. 모든 기록은 이 기기에만 저장돼요. 훈련의 마이크 소리는 녹음하지 않고 기기 안에서만 분석해요.</p>
-        <p class="version">숨결 v2.2</p>
+        <p class="version">숨결 v2.3</p>
       </div>
     </section>
   </main>
