@@ -33,7 +33,7 @@
   const LEVEL_UP_AFTER = 3;
   const STORE_KEY = 'sumgyeol.v1';
   const LEGACY_KEY = 'breathingExerciseHistory';
-  const MIN_SCALE = 0.5;
+  const LVL_MIN = 0.27, LVL_MAX = 0.74; // 화면 높이 대비 물결 높이
 
   const rhythmById = (id) => RHYTHMS.find((r) => r.id === id) || RHYTHMS[3];
   const cycleLen = (r) => r.inhale + r.hold + r.exhale;
@@ -293,74 +293,6 @@
   })();
 
   /* ------------------------------------------------------------------
-     입자 필드: 들숨엔 중심으로 모이고, 날숨엔 퍼진다
-     ------------------------------------------------------------------ */
-  const Field = (() => {
-    const canvas = $('#field');
-    const ctx = canvas.getContext('2d');
-    let w = 0, h = 0, dpr = 1, parts = [], raf = 0;
-    let breath = 0.5, target = 0.5, external = false;
-
-    function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = window.innerWidth; h = window.innerHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const n = Math.round(clamp((w * h) / 16000, 36, 90));
-      parts = Array.from({ length: n }, () => ({
-        a: Math.random() * Math.PI * 2,
-        r: 0.25 + Math.random() * 0.75,
-        sp: (0.00006 + Math.random() * 0.00014) * (Math.random() < 0.5 ? -1 : 1),
-        size: 0.6 + Math.random() * 1.6,
-        tw: Math.random() * Math.PI * 2,
-        hue: Math.random(),
-      }));
-    }
-
-    function center() {
-      const st = $('#stage').getBoundingClientRect();
-      return { x: st.left + st.width / 2, y: st.top + st.height / 2, R: Math.max(w, h) * 0.62 };
-    }
-
-    function frame(now) {
-      raf = requestAnimationFrame(frame);
-      if (document.hidden) return;
-      if (!external) target = 0.5 + 0.5 * Math.sin(now / 1430); // 대기 중 느린 숨
-      breath += (target - breath) * 0.06;
-      const { x, y, R } = center();
-      ctx.clearRect(0, 0, w, h);
-      const pull = 1.12 - breath * 0.42;
-      const cs = getComputedStyle(document.body);
-      const ca = cs.getPropertyValue('--a').trim() || '#a6e3d3';
-      const cb = cs.getPropertyValue('--b').trim() || '#8fb3e6';
-      for (const p of parts) {
-        p.a += p.sp * 16;
-        const rr = (0.18 + p.r * 0.82) * R * pull;
-        const px = x + Math.cos(p.a) * rr, py = y + Math.sin(p.a) * rr * 0.92;
-        const alpha = (0.18 + 0.5 * (0.5 + 0.5 * Math.sin(now / 900 + p.tw))) * (1 - p.r * 0.45);
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = p.hue > 0.5 ? ca : cb;
-        ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function start() {
-      return; // v3: 입자 필드 미사용
-      if (reducedMotion.matches) return;
-      resize();
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(frame);
-    }
-    window.addEventListener('resize', () => { if (!reducedMotion.matches) resize(); });
-    return {
-      start,
-      set(v) { external = true; target = v; },
-      release() { external = false; },
-    };
-  })();
-
-  /* ------------------------------------------------------------------
      기기 기능: 화면 유지, 진동
      ------------------------------------------------------------------ */
   const Device = {
@@ -382,17 +314,14 @@
      ------------------------------------------------------------------ */
   const el = {
     body: document.body,
-    orbWrap: $('#orbWrap'),
-    phase: $('#phaseText'), count: $('#countText'), sub: $('#subText'),
-    ringProgress: $('#ringProgress'), ringHead: $('#ringHead'),
-    segs: { inhale: $('.seg-inhale'), hold: $('.seg-hold'), exhale: $('.seg-exhale') },
+    phase: $('#phaseText'), count: $('#countText'), cycleBar: $('#cycleBar'),
+    heroTitle: $('#heroTitle'), heroMeta: $('#heroMeta'),
     start: $('#startBtn'), stop: $('#stopBtn'), pause: $('#pauseBtn'), sound: $('#soundBtn'),
     sessionMeta: $('#sessionMeta'),
     rhythmPicker: $('#rhythmPicker'), cyclePicker: $('#cyclePicker'), totalTime: $('#totalTime'),
     todayCount: $('#todayCount'), streakCount: $('#streakCount'),
     announcer: $('#announcer'),
   };
-  const RING_C = 2 * Math.PI * 48;
 
   /* ------------------------------------------------------------------
      세션 엔진 (타임스탬프 기반 → 탭이 백그라운드여도 정확)
@@ -407,27 +336,13 @@
   };
 
   function setOrb(p) {
-    el.orbWrap.style.setProperty('--s', (MIN_SCALE + (1 - MIN_SCALE) * p).toFixed(4));
-    document.body.style.setProperty('--p', p.toFixed(4)); // 색: 파랑 → (가득 차면) 주황 → 파랑
+    const b = document.body.style;
+    b.setProperty('--lvl', (LVL_MIN + (LVL_MAX - LVL_MIN) * p).toFixed(4)); // 화면 아래에서 차오르는 높이
+    b.setProperty('--p', p.toFixed(4));                                       // 색: 파랑 → (가득 차면) 주황 → 파랑
   }
 
-  function layoutRing(r) {
-    const L = cycleLen(r), gap = 1.6;
-    let offset = 0;
-    for (const k of ['inhale', 'hold', 'exhale']) {
-      const len = (r[k] / L) * RING_C;
-      el.segs[k].style.strokeDasharray = `${Math.max(len - gap, 0.1)} ${RING_C}`;
-      el.segs[k].style.strokeDashoffset = `${-offset - gap / 2}`;
-      offset += len;
-    }
-    setRingProgress(0);
-  }
-  function setRingProgress(frac) {
-    el.ringProgress.style.strokeDasharray = `${(frac * RING_C).toFixed(2)} ${RING_C}`;
-    const ang = frac * Math.PI * 2; // ring은 -90° 회전 상태
-    el.ringHead.setAttribute('cx', (50 + 48 * Math.cos(ang)).toFixed(2));
-    el.ringHead.setAttribute('cy', (50 + 48 * Math.sin(ang)).toFixed(2));
-  }
+  function layoutRing() { setRingProgress(0); }
+  function setRingProgress(frac) { el.cycleBar.style.width = `${(frac * 100).toFixed(2)}%`; } // 한 사이클 안의 위치(얇은 상단 바)
 
   function setPhaseAttr(p) { el.body.dataset.phase = p; }
   function setMode(m) { el.body.dataset.mode = m === 'idle' || m === 'done' ? 'idle' : 'session'; }
@@ -441,10 +356,8 @@
   }
 
   function idleReadout() {
-    const r = S.rhythm;
-    el.phase.textContent = '준비되셨나요?';
-    setCount(rhythmLabel(r));
-    el.sub.textContent = `들숨 ${r.inhale} · 멈춤 ${r.hold} · 날숨 ${r.exhale}`;
+    el.phase.textContent = '준비';
+    el.count.textContent = '';
   }
 
   function announce(t) { el.announcer.textContent = ''; setTimeout(() => { el.announcer.textContent = t; }, 30); }
@@ -562,7 +475,6 @@
     cancelAnimationFrame(S.raf);
     Sound.stopPad(); Sound.resume();
     Device.release();
-    Field.release();
     el.body.classList.remove('paused');
   }
 
@@ -609,7 +521,7 @@
   function resetToIdle() {
     S.mode = 'idle'; S.phase = null;
     setMode('idle'); setPhaseAttr('idle');
-    el.orbWrap.style.removeProperty('--s');
+    document.body.style.removeProperty('--lvl');
     document.body.style.removeProperty('--p');
     layoutRing(S.rhythm);
     idleReadout();
@@ -743,11 +655,13 @@
       const checked = r.id === S.rhythm.id;
       const badge = r.id === 'r4' ? '<em class="badge">목표</em>' : '';
       return `<button class="seg" role="radio" aria-checked="${checked}" data-id="${r.id}" aria-label="${r.name} ${r.inhale}초 들숨 ${r.hold}초 멈춤 ${r.exhale}초 날숨, 완주 ${fulls[r.id]}회">
-        ${badge}<b>${rhythmLabel(r)}</b><span>${r.id === 'r4' ? '43초' : r.name}</span></button>`;
+        ${badge}<div class="sg"><b>${rhythmLabel(r)}</b><span>${r.name}${r.id === 'r4' ? ' · 43초' : ''}</span></div></button>`;
     }).join('');
     el.cyclePicker.innerHTML = CYCLE_OPTIONS.map((n) =>
       `<button class="pill" role="radio" aria-checked="${n === S.cycles}" data-n="${n}">${n}회</button>`).join('');
     el.totalTime.textContent = `총 ${fmtDuration(cycleLen(S.rhythm) * S.cycles)}`;
+    el.heroTitle.textContent = `${S.rhythm.name} · ${rhythmLabel(S.rhythm)}`;
+    el.heroMeta.textContent = `${S.cycles} 사이클 · 약 ${fmtDuration(cycleLen(S.rhythm) * S.cycles)}`;
   }
 
   function setRhythm(id) {
@@ -784,7 +698,6 @@
     el.start.classList.remove('pressed'); void el.start.offsetWidth; el.start.classList.add('pressed');
   });
   el.start.addEventListener('click', begin);
-  $('#orbStart').addEventListener('click', begin);
   el.stop.addEventListener('click', stop);
   el.pause.addEventListener('click', togglePause);
   el.sound.addEventListener('click', () => {
@@ -1030,7 +943,6 @@
       el.sound.setAttribute('aria-pressed', 'false');
       el.sound.setAttribute('aria-label', '소리 켜기');
     }
-    Field.start();
     if (!store.onboarded) setTimeout(showOnboarding, 500);
     save(); // v1 이전 데이터 영구화
 
