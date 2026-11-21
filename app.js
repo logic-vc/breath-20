@@ -23,17 +23,17 @@
   ];
   const CYCLE_OPTIONS = [1, 3, 5, 10];
   const MOODS = [
-    { label: '긴장', c: '#e9a9a3', k: 0.7 },
-    { label: '불안', c: '#efc3a4', k: 0.78 },
-    { label: '보통', c: '#d9d4c4', k: 0.86 },
-    { label: '편안', c: '#b8e6d4', k: 0.94 },
-    { label: '평온', c: '#a8ecd6', k: 1.0 },
+    { label: '긴장', c: '#FF9A4D', k: 0.72 },
+    { label: '불안', c: '#F8B97F', k: 0.8 },
+    { label: '보통', c: '#C9C9DC', k: 0.88 },
+    { label: '편안', c: '#A4C6F2', k: 0.94 },
+    { label: '평온', c: '#86B6F3', k: 1.0 },
   ];
   const PHASE_LABEL = { inhale: '들이쉬기', hold: '멈추기', exhale: '내쉬기' };
   const LEVEL_UP_AFTER = 3;
   const STORE_KEY = 'sumgyeol.v1';
   const LEGACY_KEY = 'breathingExerciseHistory';
-  const MIN_SCALE = 0.42;
+  const MIN_SCALE = 0.5;
 
   const rhythmById = (id) => RHYTHMS.find((r) => r.id === id) || RHYTHMS[3];
   const cycleLen = (r) => r.inhale + r.hold + r.exhale;
@@ -346,6 +346,7 @@
     }
 
     function start() {
+      return; // v3: 입자 필드 미사용
       if (reducedMotion.matches) return;
       resize();
       cancelAnimationFrame(raf);
@@ -407,7 +408,7 @@
 
   function setOrb(p) {
     el.orbWrap.style.setProperty('--s', (MIN_SCALE + (1 - MIN_SCALE) * p).toFixed(4));
-    Field.set(p);
+    document.body.style.setProperty('--p', p.toFixed(4)); // 색: 파랑 → (가득 차면) 주황 → 파랑
   }
 
   function layoutRing(r) {
@@ -471,8 +472,8 @@
     requestAnimationFrame(() => setOrb(0)); // 2.6초간 천천히 가장 작은 크기로
 
     let n = 3;
-    el.phase.textContent = '편하게 앉아 어깨를 내려놓으세요';
-    el.sub.textContent = '곧 들이쉬기를 시작해요';
+    el.phase.textContent = '준비';
+    $('#sessionNote').textContent = '편하게 앉아 어깨를 내려놓으세요';
     setCount(n, true);
     announce('3초 후 시작합니다');
     const step = () => {
@@ -484,6 +485,7 @@
   }
 
   function run() {
+    $('#sessionNote').textContent = '숨이 버거우면 언제든 평소대로 쉬어도 괜찮아요';
     S.mode = 'running';
     S.start = performance.now();
     S.raf = requestAnimationFrame(tick);
@@ -517,7 +519,7 @@
   function enterPhase(phase, remaining) {
     setPhaseAttr(phase);
     el.phase.textContent = PHASE_LABEL[phase];
-    el.sub.textContent = `사이클 ${S.cycleIdx + 1} / ${S.cycles}`;
+    el.sessionMeta.textContent = `${rhythmLabel(S.rhythm)} · 사이클 ${S.cycleIdx + 1} / ${S.cycles}`;
     Sound.breathe(phase, remaining);
     Sound.chime(phase);
     Device.buzz(phase);
@@ -578,10 +580,12 @@
     }
 
     Device.buzz('done');
+    setMode('idle'); // 요약 시트 뒤에는 홈 화면이 보이도록
+    document.body.style.removeProperty('--p');
     setPhaseAttr('idle');
     el.phase.textContent = '잘 하셨어요';
     setCount('✓');
-    el.sub.textContent = `${done} 사이클 완료`;
+    el.sessionMeta.textContent = `${done} 사이클 완료`;
     setRingProgress(1);
 
     const record = Records.add({
@@ -606,6 +610,7 @@
     S.mode = 'idle'; S.phase = null;
     setMode('idle'); setPhaseAttr('idle');
     el.orbWrap.style.removeProperty('--s');
+    document.body.style.removeProperty('--p');
     layoutRing(S.rhythm);
     idleReadout();
   }
