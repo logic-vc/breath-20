@@ -2,8 +2,8 @@
    숨결 — tide.js
    아래에서 차오르는 물(가운데가 솟은 돔 + 잔잔한 물결) + 표정이 변하는 얼굴
    - 수위(lvl)와 숨 진행도(p)만 받아서 매 프레임 SVG 경로를 그린다.
-   - 얼굴: 크고 길쭉한 타원 눈. 숨이 가득 찰수록 힘들어하고(눈 찡그림·입 굳음·떨림·땀),
-           내쉬면 "후~" 하며 다시 편안한 웃음으로 돌아온다.
+   - 얼굴: 크고 길쭉한 타원 눈. 항상 웃는다. 숨이 가득 찰수록 땀이 맺히고 볼이 붉어지며 웃음이 살짝 작아지고,
+           내쉬면 땀이 사라지고 다시 활짝 웃는다.
    - 호흡 화면(#tideSession)과 홈 미리보기(#tideHero)가 같은 코드를 쓴다.
    ========================================================================== */
 (() => {
@@ -21,49 +21,48 @@
   };
 
   /* ---------------- 얼굴 ---------------- */
+  // 항상 웃는 얼굴. 숨이 찰수록 웃음이 살짝 작아지고 땀이 맺히며 볼이 붉어지고,
+  // 내쉬면 땀이 사라지고 다시 활짝 웃는다. (찡그림·무표정 없음)
   function createFace(parent) {
-    const g = make('g', {}, parent);               // 전체(위치·크기·떨림)
+    const g = make('g', {}, parent);               // 전체(위치·크기)
     const inner = make('g', {}, g);
+    const cheekL = make('ellipse', { cx: 21, cy: 44, rx: 9, ry: 5.5, fill: '#F59A95', opacity: 0 }, inner);
+    const cheekR = make('ellipse', { cx: 99, cy: 44, rx: 9, ry: 5.5, fill: '#F59A95', opacity: 0 }, inner);
     const eyeL = make('g', {}, inner), eyeR = make('g', {}, inner);
     [eyeL, eyeR].forEach((eye) => {
       make('ellipse', { cx: 0, cy: 0, rx: 7.6, ry: 13.5, fill: INK }, eye);
       make('circle', { cx: 2.6, cy: -5.5, r: 2.4, fill: '#fff', opacity: 0.85 }, eye); // 반짝이는 눈빛
     });
     const mouth = make('path', { fill: 'none', stroke: INK, 'stroke-width': 5.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, inner);
-    const blow = make('ellipse', { cx: 60, cy: 53, rx: 6, ry: 7.5, fill: 'none', stroke: INK, 'stroke-width': 5.5 }, inner); // "후~"
-    const sweat = make('path', { d: 'M104 4 q-7.5 10.5 0 16 q7.5 -5.5 0 -16z', fill: '#8DB8F5' }, inner);
+    const drops = [0, 1].map(() => make('path', { d: 'M0 0 q-6.5 9.5 0 14.5 q6.5 -5 0 -14.5z', fill: '#DCEEFF', stroke: '#fff', 'stroke-width': 1, opacity: 0 }, inner));
 
     /** p: 0(편안)~1(가득), phase: 'inhale' | 'hold' | 'exhale' | ..., t: 초 */
     function update(p, phase, t) {
       const exhale = phase === 'exhale';
-      const strain = smooth(0.45, 1, p);           // 힘든 정도
-      // 눈: 힘들수록 좁아지고 안쪽이 처진다
-      const sy = 1 - 0.4 * strain, sx = 1 + 0.12 * strain, rot = 10 * strain;
-      eyeL.setAttribute('transform', `translate(38 25) rotate(${rot.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
-      eyeR.setAttribute('transform', `translate(82 25) rotate(${(-rot).toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
-      // 입: 웃음 → 일자 → 떨리는 입
-      const s = p < 0.45 ? lerp(11, 1.5, p / 0.45) : lerp(1.5, -6, (p - 0.45) / 0.55);
-      const w = lerp(60, 38, strain);
-      const wob = 2.4 * smooth(0.75, 1, p);
+      const strain = smooth(0.4, 1, p);            // 힘든 정도(표정 변화의 크기)
+      // 눈: 모양은 그대로, 힘들수록 아주 조금만 작아진다
+      const sy = 1 - 0.1 * strain, sx = 1 - 0.04 * strain;
+      eyeL.setAttribute('transform', `translate(38 25) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
+      eyeR.setAttribute('transform', `translate(82 25) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
+      // 입: 항상 위로 휜 미소. 편안할 땐 크게, 가득 찼을 땐 작게(그래도 미소)
+      const s = lerp(12.5, 6.5, strain) + (exhale ? 2.2 * (1 - strain) : 0);
+      const w = lerp(62, 48, strain);
       const N = 14; let d = '';
       for (let i = 0; i <= N; i++) {
         const u = (2 * i) / N - 1, x = 60 + (u * w) / 2;
-        const y = 52 + s * (1 - u * u) + wob * Math.sin(u * Math.PI * 3 + t * 16) * (1 - u * u);
-        d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+        d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (51 + s * (1 - u * u)).toFixed(1);
       }
       mouth.setAttribute('d', d);
-      // 내쉴 때: 동그란 입으로 "후~" 하다가 다시 웃는다
-      const b = exhale ? smooth(0.26, 0.36, p) : 0; // 날숨 대부분은 "후~", 거의 다 내쉬면 웃는 입으로
-      blow.setAttribute('opacity', b.toFixed(2));
-      blow.setAttribute('ry', (7.5 + 2 * b).toFixed(1));
-      mouth.setAttribute('opacity', (1 - b).toFixed(2));
-      // 땀: 한계에 가까울수록 맺힌다
-      const sw = smooth(0.7, 0.95, p) * (exhale ? 0.6 : 1);
-      sweat.setAttribute('opacity', sw.toFixed(2));
-      sweat.setAttribute('transform', `translate(0 ${(Math.sin(t * 3) * 1.2 + sw * 3).toFixed(1)})`);
-      // 가득 찼을 때 얼굴이 가늘게 떨린다
-      const shake = p > 0.88 && !exhale ? Math.sin(t * 70) * 0.9 : 0;
-      inner.setAttribute('transform', `translate(${shake.toFixed(2)} 0)`);
+      // 볼: 힘들수록 발그레
+      const cheek = 0.5 * smooth(0.5, 0.95, p);
+      cheekL.setAttribute('opacity', cheek.toFixed(2)); cheekR.setAttribute('opacity', cheek.toFixed(2));
+      // 땀: 가득 찰수록 맺혀 또르르 흐른다. 내쉬면 사라진다.
+      const sw = smooth(0.55, 0.9, p) * (exhale ? 0.5 : 1);
+      drops.forEach((drop, k) => {
+        const cyc = ((t * 0.7 + k * 0.5) % 1), x = k ? 6 : 110, y0 = k ? 10 : 6;
+        drop.setAttribute('opacity', (sw * (1 - cyc * 0.75) * (k ? 0.8 : 1)).toFixed(2));
+        drop.setAttribute('transform', `translate(${x} ${(y0 + cyc * 16).toFixed(1)}) scale(${k ? 0.9 : 1.15})`);
+      });
     }
     return { g, update };
   }
