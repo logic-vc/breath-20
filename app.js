@@ -33,7 +33,7 @@
   const LEVEL_UP_AFTER = 3;
   const STORE_KEY = 'sumgyeol.v1';
   const LEGACY_KEY = 'breathingExerciseHistory';
-  const LVL_MIN = 0.27, LVL_MAX = 0.74; // 화면 높이 대비 물결 높이
+  const LVL_MIN = 0.30, LVL_MAX = 0.80; // 형태의 크기(스케일): 꺼졌을 때 ↔ 부풀었을 때
 
   const rhythmById = (id) => RHYTHMS.find((r) => r.id === id) || RHYTHMS[3];
   const cycleLen = (r) => r.inhale + r.hold + r.exhale;
@@ -63,7 +63,7 @@
     version: 1,
     onboarded: false,
     days: {},
-    settings: { volume: 60, chime: true, haptics: true, checkin: true, wakeLock: true, sound: true, rhythm: 'r4', cycles: 3 },
+    settings: { volume: 60, chime: true, haptics: true, checkin: true, wakeLock: true, sound: true, rhythm: 'r4', cycles: 3, shape: 'circle' },
   };
 
   function loadStore() {
@@ -337,7 +337,7 @@
 
   function setOrb(p) {
     const b = document.body.style;
-    b.setProperty('--lvl', (LVL_MIN + (LVL_MAX - LVL_MIN) * p).toFixed(4)); // 화면 아래에서 차오르는 높이
+    b.setProperty('--lvl', (LVL_MIN + (LVL_MAX - LVL_MIN) * p).toFixed(4)); // 부푸는 크기
     b.setProperty('--p', p.toFixed(4));                                       // 색: 파랑 → (가득 차면) 주황 → 파랑
   }
 
@@ -840,6 +840,14 @@
     vol.value = store.settings.volume; paint();
     vol.addEventListener('input', () => { store.settings.volume = Number(vol.value); paint(); Sound.applyVolume(); });
     vol.addEventListener('change', () => { save(); if (S.mode === 'idle') Sound.preview(); });
+
+    const sp = $('#shapePicker');
+    const applyShape = () => {
+      document.body.dataset.shape = store.settings.shape || 'circle';
+      sp.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === (store.settings.shape || 'circle'))));
+    };
+    sp.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; store.settings.shape = b.dataset.v; save(); applyShape(); });
+    applyShape();
 
     const map = { optChime: 'chime', optHaptics: 'haptics', optCheckin: 'checkin', optWake: 'wakeLock' };
     for (const [id, key] of Object.entries(map)) {
