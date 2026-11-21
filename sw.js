@@ -1,7 +1,7 @@
 /* 숨결 service worker — 오프라인 우선 앱 셸 캐시 */
-const CACHE = 'sumgyeol-v2.1.0';
+const CACHE = 'sumgyeol-v2.4.0';
 const ASSETS = [
-  './', './index.html', './styles.css', './app.js', './training.js', './manifest.webmanifest',
+  './', './index.html', './styles.css', './app.js', './tide.js', './training.js', './manifest.webmanifest',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png',
 ];
 

@@ -82,32 +82,21 @@ h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
 .view-head { padding: 6px 0 4px; }
 
 /* ==========================================================================
-   물: 아래에서 차오르는 수위 + 잔잔한 물결 (호흡 화면 · 홈 카드 공용)
-   --lvl: 수위(0~1), --p: 숨 진행도(색)
+   물: 아래에서 차오르는 수위 + 가운데가 솟은 돔 + 잔잔한 물결 (tide.js가 그린다)
    ========================================================================== */
-.water {
+.tide-svg {
   --orb: color-mix(in oklch, var(--orange) calc(clamp(0, var(--p) * 3 - 2, 1) * 100%),
            color-mix(in oklch, var(--coral) calc(clamp(0, var(--p) * 3 - 1, 1) * 100%),
              color-mix(in oklch, var(--lav) calc(clamp(0, var(--p) * 3, 1) * 100%), var(--blue))));
-  position: absolute; left: 0; right: 0; bottom: 0; height: 100%;
-  background: var(--orb);
-  transform: translateY(calc((1 - var(--lvl)) * 100%));
-  will-change: transform;
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
 }
-/* 윗면의 물결 두 겹 (마스크로 파도 모양을 만들고 좌우로 천천히 흘린다) */
-.water::before, .water::after { content: ""; position: absolute; left: 0; right: 0; background: var(--orb); -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x; }
-.water::before { top: -16px; height: 17px; -webkit-mask-image: var(--wave); mask-image: var(--wave); -webkit-mask-size: 180px 17px; mask-size: 180px 17px; animation: wave-a 7s linear infinite; }
-.water::after { top: -24px; height: 20px; opacity: .38; -webkit-mask-image: var(--wave); mask-image: var(--wave); -webkit-mask-size: 260px 20px; mask-size: 260px 20px; animation: wave-b 11s linear infinite; }
-:root { --wave: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 20' preserveAspectRatio='none'><path d='M0 11 Q40 1 80 11 T160 11 V20 H0Z' fill='black'/></svg>"); }
-@keyframes wave-a { to { -webkit-mask-position-x: -180px; mask-position-x: -180px; } }
-@keyframes wave-b { from { -webkit-mask-position-x: -260px; mask-position-x: -260px; } to { -webkit-mask-position-x: 0; mask-position-x: 0; } }
-body.paused .water::before, body.paused .water::after { animation-play-state: paused; }
+.tide-svg .w1 { fill: var(--orb); }
+.tide-svg .w2 { fill: color-mix(in oklch, var(--orb) 38%, transparent); }
 
 /* ---------- 호흡 화면 ---------- */
 .breath-screen { position: fixed; inset: 0; z-index: 12; background: #fff; overflow: hidden; visibility: hidden; opacity: 0; transition: opacity .5s var(--ease), visibility 0s linear .5s; }
 body[data-mode="session"] .breath-screen { visibility: visible; opacity: 1; transition: opacity .5s var(--ease); }
 body[data-mode="session"] { overflow: hidden; }
-body[data-phase="prep"] .breath-screen .water { transition: transform 2.6s var(--ease-soft); }
 .bs-text { position: absolute; top: calc(84px + var(--safe-t)); left: 0; right: 0; text-align: center; z-index: 2; }
 .phase { font-size: clamp(32px, 8.4vw, 42px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.2; }
 .count { margin-top: 4px; font-size: clamp(44px, 12vw, 60px); font-weight: 300; color: var(--ink-2); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; line-height: 1.1; min-height: 1.1em; }
@@ -137,9 +126,7 @@ body[data-mode="session"] .tabbar { transform: translateY(110%); pointer-events:
 body[data-mode="session"] main { visibility: hidden; }
 
 /* ---------- 홈 ---------- */
-.hero { position: relative; height: 210px; border-radius: 28px; border: 1px solid var(--line); overflow: hidden; background: #fff; animation: idle-tide 9s var(--ease-soft) infinite; }
-@property --p { syntax: '<number>'; inherits: true; initial-value: 0; }
-@keyframes idle-tide { 0%, 100% { --lvl: .26; --p: 0; } 50% { --lvl: .56; --p: .95; } }
+.hero { position: relative; height: 230px; border-radius: 28px; border: 1px solid var(--line); overflow: hidden; background: #fff; }
 .hero-text { position: absolute; top: 20px; left: 22px; right: 22px; z-index: 2; display: grid; gap: 2px; }
 .hero-text b { font-size: 21px; font-weight: 700; letter-spacing: -0.04em; }
 .hero-text span { font-size: 13.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
