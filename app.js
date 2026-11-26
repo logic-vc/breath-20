@@ -64,7 +64,7 @@
     version: 1,
     onboarded: false,
     days: {},
-    settings: { volume: 60, chime: true, haptics: true, checkin: true, wakeLock: true, sound: true, rhythm: 'r1', cycles: 3 },
+    settings: { volume: 60, chime: true, haptics: true, checkin: true, wakeLock: true, sound: true, music: 'm1', rhythm: 'r1', cycles: 3 },
   };
 
   function loadStore() {
@@ -146,7 +146,7 @@
   };
 
   /* ------------------------------------------------------------------
-     사운드: 호흡과 함께 숨 쉬는 생성형 앰비언트 (파일 없이 코드로 합성)
+     사운드: 배경 음악(bgm/*.mp3 반복 재생) + 단계 신호음(코드로 합성)
      ------------------------------------------------------------------ */
   const Sound = (() => {
     let ctx = null, master = null, reverb = null, voice = null, muted = false;
@@ -193,50 +193,51 @@
       master.gain.setTargetAtTime(level(), ctx.currentTime, t);
     }
 
-    // A 장조 add9 계열의 열린 화음 — 긴장 없이 떠 있는 느낌
-    const PAD_NOTES = [
-      { f: 55.0,   g: 0.10, type: 'sine' },     // A1 서브
-      { f: 110.0,  g: 0.07, type: 'triangle' }, // A2
-      { f: 164.81, g: 0.06, type: 'triangle' }, // E3
-      { f: 246.94, g: 0.045, type: 'triangle' },// B3
-      { f: 277.18, g: 0.04, type: 'sine' },     // C#4
-      { f: 329.63, g: 0.035, type: 'sawtooth' },// E4 (필터가 열릴 때 반짝임)
-    ];
+    // 배경 음악: 녹음된 곡을 끊김 없이 겹쳐 가며 반복한다 (설정에서 곡 선택, '끔'이면 신호음만)
+    const TRACKS = { m1: 'bgm/track1.mp3', m2: 'bgm/track2.mp3', m3: 'bgm/track3.mp3' };
+    const XFADE = 5; // 곡 끝과 처음을 겹치는 길이(초)
+    const raw = {}, decoded = {};
+    function fetchTrack(id) {
+      if (!TRACKS[id]) return Promise.reject(new Error('no track'));
+      if (!raw[id]) raw[id] = fetch(TRACKS[id]).then((r) => { if (!r.ok) throw new Error('bgm ' + r.status); return r.arrayBuffer(); }).catch((e) => { delete raw[id]; throw e; });
+      return raw[id];
+    }
+    function loadTrack(id) {
+      if (!decoded[id]) {
+        decoded[id] = fetchTrack(id)
+          .then((ab) => new Promise((res, rej) => ctx.decodeAudioData(ab.slice(0), res, rej)))
+          .catch((e) => { delete decoded[id]; throw e; });
+      }
+      return decoded[id];
+    }
     const BELL_NOTES = [440, 493.88, 554.37, 659.25, 739.99, 880, 987.77, 1108.73];
+
+    function playLoop(v, buf, when, first) {
+      if (voice !== v) return;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const g = ctx.createGain();
+      const fadeIn = first ? 2.5 : XFADE, end = when + buf.duration;
+      g.gain.setValueAtTime(0, when);
+      g.gain.linearRampToValueAtTime(1, when + fadeIn);
+      g.gain.setValueAtTime(1, end - XFADE);
+      g.gain.linearRampToValueAtTime(0, end);
+      src.connect(g).connect(v.out);
+      src.start(when);
+      v.nodes.push(src);
+      const next = end - XFADE; // 다음 재생은 끝나기 XFADE초 전에 겹쳐 시작
+      v.timer = setTimeout(() => playLoop(v, buf, next, false), Math.max(0, (next - ctx.currentTime - 1.5) * 1000));
+    }
 
     function startPad() {
       if (!ensure()) return;
       stopPad(0.2);
-      const t = ctx.currentTime;
       const v = { nodes: [], timer: 0 };
-      v.out = ctx.createGain(); v.out.gain.setValueAtTime(0, t); v.out.gain.linearRampToValueAtTime(0.8, t + 3);
-      v.filter = ctx.createBiquadFilter(); v.filter.type = 'lowpass'; v.filter.Q.value = 0.8;
-      v.filter.frequency.setValueAtTime(520, t);
-      v.filter.connect(v.out);
+      v.out = ctx.createGain(); v.out.gain.value = 0.85;
       v.out.connect(master);
-      v.out.connect(reverb);
-
-      for (const n of PAD_NOTES) {
-        for (const detune of [-7, 7]) {
-          const o = ctx.createOscillator(); o.type = n.type; o.frequency.value = n.f; o.detune.value = detune;
-          const g = ctx.createGain(); g.gain.value = n.g;
-          // 느린 트레몰로로 살아있는 질감
-          const lfo = ctx.createOscillator(); lfo.frequency.value = 0.05 + Math.random() * 0.12;
-          const lfoG = ctx.createGain(); lfoG.gain.value = n.g * 0.35;
-          lfo.connect(lfoG).connect(g.gain);
-          o.connect(g).connect(v.filter);
-          o.start(t); lfo.start(t);
-          v.nodes.push(o, lfo);
-        }
-      }
-      // 가끔 울리는 맑은 벨
-      const sparkle = () => {
-        if (voice !== v) return;
-        bell(BELL_NOTES[Math.floor(Math.random() * BELL_NOTES.length)], 0.035, 3.5, 0.85);
-        v.timer = setTimeout(sparkle, 5000 + Math.random() * 7000);
-      };
-      v.timer = setTimeout(sparkle, 4000);
       voice = v;
+      const id = store.settings.music;
+      if (!TRACKS[id]) return; // 음악 끔: 신호음만
+      loadTrack(id).then((buf) => playLoop(v, buf, ctx.currentTime + 0.05, true)).catch(() => { /* 음악을 못 불러와도 훈련은 계속 */ });
     }
 
     function stopPad(fade = 1.6) {
@@ -247,26 +248,17 @@
       v.out.gain.cancelScheduledValues(t);
       v.out.gain.setValueAtTime(v.out.gain.value, t);
       v.out.gain.linearRampToValueAtTime(0, t + fade);
-      // 이 세션의 노드만 정리 (v1의 재시작 시 음악이 꺼지던 버그 수정)
       setTimeout(() => { v.nodes.forEach((n) => { try { n.stop(); } catch (e) { /* noop */ } }); v.out.disconnect(); }, fade * 1000 + 200);
     }
 
-    // 호흡 단계에 맞춰 필터와 음량을 움직인다
+    // 호흡 단계에 맞춰 음악이 살짝 커졌다 작아진다
     function breathe(phase, dur) {
       if (!ctx || !voice) return;
-      const t = ctx.currentTime, f = voice.filter.frequency, g = voice.out.gain;
-      f.cancelScheduledValues(t); g.cancelScheduledValues(t);
-      f.setValueAtTime(Math.max(f.value, 60), t);
+      const t = ctx.currentTime, g = voice.out.gain;
+      g.cancelScheduledValues(t);
       g.setValueAtTime(g.value, t);
-      if (phase === 'inhale') {
-        f.exponentialRampToValueAtTime(2400, t + dur);
-        g.linearRampToValueAtTime(1.0, t + dur);
-      } else if (phase === 'hold') {
-        f.exponentialRampToValueAtTime(2000, t + dur);
-      } else if (phase === 'exhale') {
-        f.exponentialRampToValueAtTime(380, t + dur);
-        g.linearRampToValueAtTime(0.7, t + dur);
-      }
+      if (phase === 'inhale') g.linearRampToValueAtTime(1.0, t + dur);
+      else if (phase === 'exhale') g.linearRampToValueAtTime(0.7, t + dur);
     }
 
     function bell(freq, gain = 0.12, decay = 2.8, wetOnly = 0) {
@@ -294,6 +286,7 @@
 
     return {
       ensure, startPad, stopPad, breathe, chime, applyVolume,
+      warm(id) { fetchTrack(id || store.settings.music).catch(() => {}); },
       setMuted(m) { muted = m; applyVolume(0.2); },
       isMuted: () => muted,
       pause() { if (ctx && ctx.state === 'running') ctx.suspend(); },
@@ -827,6 +820,19 @@
     vol.value = store.settings.volume; paint();
     vol.addEventListener('input', () => { store.settings.volume = Number(vol.value); paint(); Sound.applyVolume(); });
     vol.addEventListener('change', () => { save(); if (S.mode === 'idle') Sound.preview(); });
+
+    const mp = $('#musicPicker');
+    const paintMusic = () => $$('.pill', mp).forEach((b) => b.setAttribute('aria-checked', String(b.dataset.m === store.settings.music)));
+    let previewTimer = 0;
+    mp.addEventListener('click', (e) => {
+      const b = e.target.closest('.pill'); if (!b) return;
+      store.settings.music = b.dataset.m; save(); paintMusic();
+      if (S.mode !== 'idle') return;
+      clearTimeout(previewTimer);
+      Sound.startPad(); // 고른 곡을 잠깐 들려준다 ('끔'이면 조용해진다)
+      previewTimer = setTimeout(() => { if (S.mode === 'idle') Sound.stopPad(1.2); }, 9000);
+    });
+    paintMusic();
 
     const map = { optChime: 'chime', optHaptics: 'haptics', optCheckin: 'checkin', optWake: 'wakeLock' };
     for (const [id, key] of Object.entries(map)) {

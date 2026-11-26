@@ -1,5 +1,5 @@
 /* 숨결 service worker — 오프라인 우선 앱 셸 캐시 */
-const CACHE = 'sumgyeol-v2.5.2';
+const CACHE = 'sumgyeol-v2.6.0';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './tide.js', './privacy.html', './training.js', './manifest.webmanifest',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png',
@@ -23,6 +23,8 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.open(CACHE).then(async (cache) => {
       const cached = await cache.match(e.request, { ignoreSearch: true });
+      // 음악 파일은 크니까 한 번 받으면 다시 받지 않는다
+      if (cached && e.request.url.includes('/bgm/')) return cached;
       const network = fetch(e.request)
         .then((res) => { if (res.ok) cache.put(e.request, res.clone()); return res; })
         .catch(() => cached);

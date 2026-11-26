@@ -405,3 +405,8 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 .gc-text em:empty { display: none; }
 .g-row p, .gc-text span, .game-msg, .game-sub { word-break: keep-all; }
 .g-row p em { display: block; font-style: normal; font-size: 21px; font-weight: 800; letter-spacing: -0.02em; color: var(--orange); line-height: 1.25; }
+.row.row-stack { display: grid; gap: 12px; }
+.row.row-stack .pills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.row.row-stack .pills { width: 100%; }
+.row.row-stack .pill { width: 100%; min-width: 0; }
+.row.row-stack { grid-template-columns: 1fr; justify-content: stretch; }
