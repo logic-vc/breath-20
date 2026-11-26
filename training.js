@@ -1,8 +1,8 @@
 /* ==========================================================================
    숨결 — training.js
    마이크로 숨소리의 '세기'를 가늠해 하는 호흡 훈련 2종
-     · 공 띄우기       (세게 마시기: 세기에 따라 공 1·2·3개)
-     · 일정하게 마시기 (초록 칸에 공을 두는 동안 폐가 차오름)
+     · 공 띄우기       (입술을 좁혀 '슈웁—' 세게 당겨 마시기: 세기에 따라 공 1·2·3개)
+     · 일정하게 마시기 (입술을 좁혀 '스—' 소리 나게 마시기: 초록 칸에 공을 두는 동안 폐가 차오름)
    흐름: 방법 안내(그림 3줄) → 마이크 맞추기 → 연습 1회 → 본 훈련 5회
    - 소리는 기기 안에서만 분석. 녹음/저장/전송 없음.
    - 실제 호흡량(mL)이 아니라, 숨소리 크기로 본 '상대적 세기'.
@@ -30,12 +30,12 @@
   const GUIDES = {
     balls: [
       { art: PHONE, text: '폰을 입 앞 <b>한 뼘</b>에' },
-      { art: '<div class="g-art g-tubes"><i></i><i></i><i></i></div>', text: '빨대로 빨듯 <b>입으로 세게</b> 마시기' },
+      { art: '<div class="g-art g-tubes"><i></i><i></i><i></i></div>', text: '<em>슈웁—</em>입술을 좁혀 <b>세게 당겨</b> 마시기' },
       { art: '<div class="g-art g-star"><i></i><i></i><i></i><b>2초</b></div>', text: '공 3개를 <b>2초</b> 버티면 ⭐' },
     ],
     steady: [
       { art: PHONE, text: '폰을 입 앞 <b>한 뼘</b>에' },
-      { art: '<div class="g-art g-zone"><u></u><i></i></div>', text: '입으로 마셔서 공을 <b>초록 칸</b>에' },
+      { art: '<div class="g-art g-zone"><u></u><i></i></div>', text: '<em>스—</em>입술을 좁혀 소리 나게 마셔서 공을 <b>초록 칸</b>에' },
       { art: '<div class="g-art g-lungs"><span class="lobe l"><i></i></span><span class="lobe r"><i></i></span></div>', text: '칸 안에 있는 동안 <b>폐가 차요</b>. 가득 채우면 ⭐' },
     ],
   };
@@ -150,7 +150,7 @@
   /* ---------- 흐름 ---------- */
   function idleScreen() {
     showGuide(false);
-    setMsg(G.game === 'balls' ? '입으로 세게 마시기' : '초록 칸에 맞춰 마시기', `${REPS}회`);
+    setMsg(G.game === 'balls' ? '슈웁— 세게 당기기' : '스— 초록 칸에 맞추기', `${REPS}회`);
     el.start.textContent = '시작'; el.start.disabled = false; el.demo.hidden = false;
   }
 
@@ -192,7 +192,7 @@
   function startPractice() {
     G.state = 'practice'; G.t = 0; G.rep = null; G.lowT = 0; G.highT = 0;
     el.start.textContent = '그만하기'; el.start.disabled = false;
-    setMsg('연습 1회', G.game === 'balls' ? '입으로 세게 마셔 보세요' : '공을 초록 칸에 두어 보세요');
+    setMsg('연습 1회', G.game === 'balls' ? '입술을 좁혀 슈웁— 세게' : '입술을 좁혀 스— 초록 칸에');
   }
   function startPlay() {
     G.state = 'play'; G.practice = false; G.t = 0; G.rep = null; G.lowT = 0; G.highT = 0;
@@ -200,7 +200,7 @@
     idleMsg(); renderDots();
   }
   function idleMsg() {
-    setMsg(`${G.reps.length + 1} / ${REPS}`, G.game === 'balls' ? '세게 마시기' : '초록 칸에 맞추기');
+    setMsg(`${G.reps.length + 1} / ${REPS}`, G.game === 'balls' ? '슈웁— 세게' : '스— 초록 칸에');
   }
 
   /* ---------- 한 번의 호흡(rep) 판정 ---------- */
@@ -237,7 +237,7 @@
     if (G.state === 'practice') {
       // 연습은 기록하지 않는다. 결과만 알려 주고 본 훈련으로.
       const ok = G.game === 'balls' ? res.peakBalls > 0 : res.zone > 0.5;
-      setMsg(ok ? '좋아요!' : '조금 더 세게 마셔 보세요', `이제 ${REPS}회 시작`);
+      setMsg(ok ? '좋아요!' : '입술을 좁혀 소리 나게', `이제 ${REPS}회 시작`);
       G.cool = 2.2; G.afterCool = startPlay;
       return;
     }
@@ -303,12 +303,12 @@
     } else if (G.state === 'calib-peak') {
       G.peak = Math.max(G.peak, G.dbS);
       const left = Math.max(0, 4 - G.t);
-      setMsg('② 입으로 가장 세게 마시기', `${Math.ceil(left)}`);
+      setMsg('② 슈웁— 가장 세게 마시기', `${Math.ceil(left)}`);
       if (G.t >= 4) {
         if (G.peak - G.floor < 10) {
           Mic.stop(); setPill('off'); G.state = 'idle';
           el.start.textContent = '다시 맞추기'; el.start.disabled = false; el.demo.hidden = false;
-          setMsg('소리가 너무 작아요', '폰을 더 가까이, 입으로 마셔 보세요');
+          setMsg('소리가 너무 작아요', '폰을 더 가까이, 입술을 좁혀 소리 나게');
         } else { G.calibrated = true; G.t = 0; G.state = 'ready'; setMsg('좋아요', ''); }
       }
     } else if (G.state === 'ready') {

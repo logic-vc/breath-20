@@ -404,3 +404,4 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 .lung-pct { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--ink); text-shadow: 0 0 6px #fff, 0 0 6px #fff; }
 .gc-text em:empty { display: none; }
 .g-row p, .gc-text span, .game-msg, .game-sub { word-break: keep-all; }
+.g-row p em { display: block; font-style: normal; font-size: 21px; font-weight: 800; letter-spacing: -0.02em; color: var(--orange); line-height: 1.25; }
