@@ -135,12 +135,13 @@ body[data-mode="session"] main { visibility: hidden; }
 .panel-head { margin-bottom: 14px; flex-wrap: wrap; }
 .hint { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 
-.segmented { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .seg { position: relative; display: grid; justify-items: center; gap: 3px; padding: 14px 4px 11px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: #fff; transition: border-color .2s var(--ease), transform .18s var(--ease); }
 .seg::before { content: ""; width: 10px; height: 10px; border-radius: 50%; margin-bottom: 2px; background: #8DB8F5; }
-.seg[data-id="r2"]::before { background: #BDC4F3; } .seg[data-id="r3"]::before { background: #F8B596; } .seg[data-id="r4"]::before { background: #F97F34; }
+.seg[data-id="r2"]::before { background: #BDC4F3; } .seg[data-id="r3"]::before { background: #F8B596; } .seg[data-id="r4"]::before { background: #F97F34; } .seg[data-id="r5"]::before { background: #E8552B; } .seg[data-id="r6"]::before { background: #B8321F; }
+.seg.cleared::after { content: "✓"; position: absolute; top: 6px; right: 9px; font-size: 11px; font-weight: 800; color: var(--ink-3); }
 .seg .sg { display: grid; justify-items: center; gap: 1px; }
-.seg b { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.seg b { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .seg span { font-size: 11.5px; color: var(--ink-3); font-weight: 600; }
 .seg[aria-checked="true"] { border-color: var(--ink); }
 .seg .badge { position: absolute; top: -8px; right: 6px; font-size: 10px; font-weight: 700; font-style: normal; padding: 1px 7px; border-radius: 99px; background: var(--ink); color: #fff; }
@@ -197,8 +198,8 @@ body[data-mode="session"] main { visibility: hidden; }
 .cell:not(.future):hover, .cell.active { transform: scale(1.2); box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--ink); }
 .tooltip { position: absolute; z-index: 3; pointer-events: none; padding: 7px 11px; border-radius: 10px; font-size: 12.5px; white-space: nowrap; background: var(--ink); color: #fff; font-weight: 600; transform: translate(-50%, calc(-100% - 8px)); }
 .tooltip span { font-weight: 500; opacity: .75; }
-.ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
-.ladder::before { content: ""; position: absolute; left: 12.5%; right: 12.5%; top: 15px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--ink) var(--fill, 0%), var(--line) var(--fill, 0%)); }
+.ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
+.ladder::before { content: ""; position: absolute; left: 8.33%; right: 8.33%; top: 15px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--ink) var(--fill, 0%), var(--line) var(--fill, 0%)); }
 .step { display: grid; justify-items: center; gap: 6px; text-align: center; position: relative; }
 .step .node { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--line-2); font-size: 12px; font-weight: 700; color: var(--ink-3); }
 .step.done .node { background: var(--ink); border-color: var(--ink); color: #fff; }
@@ -254,7 +255,7 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 .sheet h3 { font-size: 23px; line-height: 1.3; letter-spacing: -0.04em; font-weight: 700; }
 .sheet .btn-primary { margin-top: 22px; }
 .eyebrow + h3 { margin-top: 0; }
-.moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 22px; }
+.moods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; }
 .mood { display: grid; justify-items: center; gap: 8px; padding: 14px 2px 12px; border-radius: 18px; border: 1.5px solid var(--line); background: #fff; font-size: 12.5px; font-weight: 600; color: var(--ink-2); transition: all .2s var(--ease); }
 .mood i { width: 30px; height: 30px; border-radius: 50%; display: block; background: var(--c); transform: scale(var(--k)); }
 @media (hover: hover) { .mood:hover { border-color: var(--line-2); } }

@@ -16,18 +16,19 @@
      상수
      ------------------------------------------------------------------ */
   const RHYTHMS = [
-    { id: 'r1', name: '입문', inhale: 6,  hold: 2, exhale: 6 },
-    { id: 'r2', name: '기본', inhale: 10, hold: 2, exhale: 10 },
-    { id: 'r3', name: '심화', inhale: 15, hold: 3, exhale: 15 },
-    { id: 'r4', name: '목표', inhale: 20, hold: 3, exhale: 20 },
+    { id: 'r1', name: 'Lv.1', inhale: 6,  hold: 2, exhale: 6 },
+    { id: 'r2', name: 'Lv.2', inhale: 10, hold: 2, exhale: 10 },
+    { id: 'r3', name: 'Lv.3', inhale: 15, hold: 3, exhale: 15 },
+    { id: 'r4', name: 'Lv.4', inhale: 20, hold: 3, exhale: 20 },
+    { id: 'r5', name: 'Lv.5', inhale: 30, hold: 3, exhale: 30 },
+    { id: 'r6', name: 'Lv.6', inhale: 40, hold: 3, exhale: 40 },
   ];
   const CYCLE_OPTIONS = [1, 3, 5, 10];
+  // 훈련 뒤 난이도 체크 (1 쉬웠다 · 2 적당했다 · 3 힘들었다)
   const MOODS = [
-    { label: '긴장', c: '#FF9A4D', k: 0.72 },
-    { label: '불안', c: '#F8B97F', k: 0.8 },
-    { label: '보통', c: '#C9C9DC', k: 0.88 },
-    { label: '편안', c: '#A4C6F2', k: 0.94 },
-    { label: '평온', c: '#86B6F3', k: 1.0 },
+    { label: '쉬웠다', c: '#86B6F3', k: 0.8 },
+    { label: '적당했다', c: '#BDC4F3', k: 0.9 },
+    { label: '힘들었다', c: '#F97F34', k: 1.0 },
   ];
   const PHASE_LABEL = { inhale: '들이쉬기', hold: '멈추기', exhale: '내쉬기' };
   const LEVEL_UP_AFTER = 3;
@@ -35,7 +36,7 @@
   const LEGACY_KEY = 'breathingExerciseHistory';
   const LVL_MIN = 0.22, LVL_MAX = 0.70; // 물 높이(화면 대비): 숨을 내쉬었을 때 ↔ 들이쉬었을 때
 
-  const rhythmById = (id) => RHYTHMS.find((r) => r.id === id) || RHYTHMS[3];
+  const rhythmById = (id) => RHYTHMS.find((r) => r.id === id) || RHYTHMS[0];
   const cycleLen = (r) => r.inhale + r.hold + r.exhale;
   const rhythmLabel = (r) => `${r.inhale}·${r.hold}·${r.exhale}`;
 
@@ -63,7 +64,7 @@
     version: 1,
     onboarded: false,
     days: {},
-    settings: { volume: 60, chime: true, haptics: true, checkin: true, wakeLock: true, sound: true, rhythm: 'r4', cycles: 3 },
+    settings: { volume: 60, chime: true, haptics: true, checkin: true, wakeLock: true, sound: true, rhythm: 'r1', cycles: 3 },
   };
 
   function loadStore() {
@@ -106,15 +107,24 @@
       return n;
     },
     totals() {
-      let seconds = 0, count = 0, deltas = [];
+      let seconds = 0, count = 0;
+      for (const v of Object.values(store.days)) { seconds += v.seconds || 0; count += v.count || 0; }
+      return { seconds, count };
+    },
+    // 끝까지 해낸 가장 높은 단계 (없으면 -1)
+    bestLevel() {
+      const m = this.fullSessionsByRhythm();
+      let best = -1;
+      RHYTHMS.forEach((r, i) => { if (m[r.id] > 0) best = i; });
+      return best;
+    },
+    // 그 단계를 끝까지 하고 '쉬웠다'고 답한 횟수
+    easyCount(id) {
+      let n = 0;
       for (const v of Object.values(store.days)) {
-        seconds += v.seconds || 0; count += v.count || 0;
-        for (const s of v.sessions || []) {
-          if (s.before != null && s.after != null) deltas.push(s.after - s.before);
-        }
+        for (const s of v.sessions || []) if (s.r === id && s.done >= s.planned && s.effort === 1) n++;
       }
-      const avgDelta = deltas.length ? deltas.reduce((a, b) => a + b, 0) / deltas.length : null;
-      return { seconds, count, avgDelta, checkins: deltas.length };
+      return n;
     },
     fullSessionsByRhythm() {
       const m = Object.fromEntries(RHYTHMS.map((r) => [r.id, 0]));
@@ -364,12 +374,8 @@
 
   async function begin() {
     if (S.mode !== 'idle') return;
-    S.mode = 'checkin'; // 체크인 중 중복 시작 방지
+    S.mode = 'checkin'; // 중복 시작 방지
     Sound.ensure(); // 사용자 제스처 안에서 오디오 활성화
-    if (store.settings.checkin) {
-      const v = await Checkin.ask('before');
-      S.before = v;
-    } else S.before = null;
     startCountdown();
   }
 
@@ -495,21 +501,21 @@
     setMode('idle'); // 요약 시트 뒤에는 홈 화면이 보이도록
     document.body.style.removeProperty('--p');
     setPhaseAttr('idle');
-    el.phase.textContent = '잘 하셨어요';
+    el.phase.textContent = '완료';
     setCount('✓');
     el.sessionMeta.textContent = `${done} 사이클 완료`;
     setRingProgress(1);
 
     const record = Records.add({
       at: Date.now(), r: S.rhythm.id, planned: S.cycles, done, secs: Math.round(secs),
-      before: S.before, after: null,
+      effort: null,
     });
     refreshHeader(true);
 
-    if (S.before != null && store.settings.checkin) {
+    if (done >= S.cycles && store.settings.checkin) {
       await wait(900);
-      const after = await Checkin.ask('after');
-      if (after != null) { record.after = after; save(); }
+      const effort = await Checkin.ask();
+      if (effort != null) { record.effort = effort; save(); }
     } else {
       await wait(700);
     }
@@ -572,10 +578,7 @@
       await Sheets.close(sheet); r(null);
     }
     return {
-      ask(when) {
-        $('#checkinEyebrow').textContent = when === 'before' ? '시작 전' : '마친 후';
-        $('#checkinTitle').textContent = when === 'before' ? '지금 마음은 어떤가요?' : '지금은 어떤가요?';
-        $('#checkinSkip').textContent = when === 'before' ? '건너뛰고 바로 시작' : '건너뛰기';
+      ask() {
         Sheets.open(sheet);
         return new Promise((res) => { resolver = res; });
       },
@@ -591,7 +594,7 @@
     $('#levelUp').addEventListener('click', (e) => {
       if (!e.target.closest('button') || !pendingLevel) return;
       setRhythm(pendingLevel.id);
-      toast(`다음 리듬 ${rhythmLabel(pendingLevel)}로 바꿨어요`);
+      toast(`${pendingLevel.name} · ${rhythmLabel(pendingLevel)}`);
       close();
     });
     async function close() {
@@ -602,30 +605,22 @@
     return {
       show(rec, full) {
         const r = rhythmById(rec.r);
-        $('#summaryTitle').textContent = full ? '수고했어요' : '좋은 시작이었어요';
-        $('#summaryLead').textContent = full
-          ? `${rhythmLabel(r)} 리듬으로 ${rec.done}번의 깊은 숨을 쉬었어요.`
-          : `${rec.done}번의 숨도 충분히 의미 있어요.`;
+        $('#summaryTitle').textContent = full ? '완료!' : '여기까지!';
+        $('#summaryLead').textContent = `${r.name} · ${rhythmLabel(r)}`;
         $('#summaryStats').innerHTML = `
-          <div><b>${rec.done}</b><span>사이클</span></div>
-          <div><b>${fmtClock(rec.secs)}</b><span>호흡 시간</span></div>
+          <div><b>${rec.done}</b><span>회</span></div>
+          <div><b>${fmtClock(rec.secs)}</b><span>시간</span></div>
           <div><b>${Records.streak()}</b><span>연속 일</span></div>`;
+        $('#summaryDelta').hidden = true;
 
-        const delta = $('#summaryDelta');
-        if (rec.before != null && rec.after != null) {
-          const d = rec.after - rec.before;
-          const tag = d > 0 ? `+${d} 편안해짐` : d === 0 ? '그대로' : `${d}`;
-          delta.innerHTML = `<span>${MOODS[rec.before - 1].label} → <b>${MOODS[rec.after - 1].label}</b></span><span class="tag ${d > 0 ? '' : 'neutral'}">${tag}</span>`;
-          delta.hidden = false;
-        } else delta.hidden = true;
-
-        // 숨길 사다리: 같은 단계 N회 완주 시 다음 단계 추천
+        // 다음 단계 추천: '쉬웠다' 2번, 또는 3번 완주(이번이 '힘들었다'면 제외)
         const lu = $('#levelUp'); pendingLevel = null;
         const i = RHYTHMS.findIndex((x) => x.id === rec.r);
         const fulls = Records.fullSessionsByRhythm()[rec.r];
-        if (full && i < RHYTHMS.length - 1 && fulls >= LEVEL_UP_AFTER && store.settings.rhythm === rec.r) {
+        const ready = Records.easyCount(rec.r) >= 2 || (fulls >= LEVEL_UP_AFTER && rec.effort !== 3);
+        if (full && i < RHYTHMS.length - 1 && ready && store.settings.rhythm === rec.r) {
           pendingLevel = RHYTHMS[i + 1];
-          lu.innerHTML = `<div><b>다음 단계 도전?</b><span>${r.name} 리듬을 ${fulls}번 완주했어요. ${pendingLevel.name} ${rhythmLabel(pendingLevel)}로 숨길을 늘려볼까요?</span></div><button class="btn-ghost">도전</button>`;
+          lu.innerHTML = `<div><b>다음 단계</b><span>${pendingLevel.name} · ${rhythmLabel(pendingLevel)}</span></div><button class="btn-ghost">도전</button>`;
           lu.hidden = false;
         } else lu.hidden = true;
 
@@ -653,9 +648,8 @@
     const fulls = Records.fullSessionsByRhythm();
     el.rhythmPicker.innerHTML = RHYTHMS.map((r) => {
       const checked = r.id === S.rhythm.id;
-      const badge = r.id === 'r4' ? '<em class="badge">목표</em>' : '';
-      return `<button class="seg" role="radio" aria-checked="${checked}" data-id="${r.id}" aria-label="${r.name} ${r.inhale}초 들숨 ${r.hold}초 멈춤 ${r.exhale}초 날숨, 완주 ${fulls[r.id]}회">
-        ${badge}<div class="sg"><b>${rhythmLabel(r)}</b><span>${r.name}${r.id === 'r4' ? ' · 43초' : ''}</span></div></button>`;
+      return `<button class="seg ${fulls[r.id] > 0 ? 'cleared' : ''}" role="radio" aria-checked="${checked}" data-id="${r.id}" aria-label="${r.name} ${r.inhale}초 들숨 ${r.hold}초 멈춤 ${r.exhale}초 날숨, 완주 ${fulls[r.id]}회">
+        <div class="sg"><span>${r.name}</span><b>${rhythmLabel(r)}</b></div></button>`;
     }).join('');
     el.cyclePicker.innerHTML = CYCLE_OPTIONS.map((n) =>
       `<button class="pill" role="radio" aria-checked="${n === S.cycles}" data-n="${n}">${n}회</button>`).join('');
@@ -720,15 +714,8 @@
   }
   function greet() {
     const h = new Date().getHours();
-    const t = h < 5 ? '고요한 밤이에요' : h < 11 ? '좋은 아침이에요' : h < 17 ? '좋은 오후예요' : h < 22 ? '편안한 저녁이에요' : '고요한 밤이에요';
-    $('#greetEyebrow').textContent = t;
-    const lines = {
-      '고요한 밤이에요': '잠들기 전,<br>천천히 한 숨씩.',
-      '좋은 아침이에요': '하루를 여는<br>깊은 숨 한 번.',
-      '좋은 오후예요': '잠시 멈추고,<br>숨을 길게.',
-      '편안한 저녁이에요': '오늘도 천천히,<br>한 숨씩.',
-    };
-    $('#greetTitle').innerHTML = lines[t];
+    $('#greetEyebrow').textContent = h < 5 ? '밤 훈련' : h < 11 ? '아침 훈련' : h < 17 ? '오후 훈련' : h < 22 ? '저녁 훈련' : '밤 훈련';
+    $('#greetTitle').innerHTML = '길게 마시고,<br>길게 내쉬기';
   }
 
   /* ------------------------------------------------------------------
@@ -737,12 +724,12 @@
   function renderJourney() {
     const tot = Records.totals();
     const streak = Records.streak();
-    const delta = tot.avgDelta;
+    const best = Records.bestLevel();
     $('#stats').innerHTML = `
-      <div class="stat"><p class="k">오늘</p><p class="v">${Records.todayCount()}<small>회</small></p><p class="d">완료한 사이클</p></div>
-      <div class="stat"><p class="k">연속</p><p class="v">${streak}<small>일</small></p><p class="d">${streak ? '흐름을 이어가요' : '오늘 시작해요'}</p></div>
-      <div class="stat"><p class="k">누적 호흡</p><p class="v">${Math.round(tot.seconds / 60)}<small>분</small></p><p class="d">총 ${tot.count}사이클</p></div>
-      <div class="stat"><p class="k">마음 변화</p><p class="v">${delta == null ? '–' : (delta > 0 ? '+' : '') + delta.toFixed(1)}</p><p class="d">${tot.checkins ? `체크인 ${tot.checkins}회 평균` : '체크인하면 보여요'}</p></div>`;
+      <div class="stat"><p class="k">최고 단계</p><p class="v">${best < 0 ? '–' : RHYTHMS[best].name}</p><p class="d">${best < 0 ? '아직 없음' : rhythmLabel(RHYTHMS[best])}</p></div>
+      <div class="stat"><p class="k">연속</p><p class="v">${streak}<small>일</small></p><p class="d">${streak ? '이어가는 중' : '오늘 시작'}</p></div>
+      <div class="stat"><p class="k">오늘</p><p class="v">${Records.todayCount()}<small>회</small></p><p class="d">호흡 횟수</p></div>
+      <div class="stat"><p class="k">누적</p><p class="v">${Math.round(tot.seconds / 60)}<small>분</small></p><p class="d">총 ${tot.count}회</p></div>`;
     renderHeatmap();
     renderLadder();
     renderRecords();
@@ -811,7 +798,7 @@
       const cur = r.id === S.rhythm.id;
       return `<li class="step ${done ? 'done' : ''} ${cur ? 'current' : ''}">
         <span class="node">${done ? '✓' : i + 1}</span>
-        <b>${rhythmLabel(r)}</b><span>${r.name}<em>${fulls[r.id]}회 완주</em></span></li>`;
+        <b>${r.name}</b><span>${rhythmLabel(r)}<em>${fulls[r.id]}회</em></span></li>`;
     }).join('');
   }
 
