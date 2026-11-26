@@ -104,30 +104,34 @@
 
       <div id="trainMenu" class="train-menu">
         <button class="game-card" data-game="balls">
-          <div class="gc-text"><b>공 띄우기</b><span>세게 들이쉬어 공 3개를 띄워요. 인센티브 스피로미터처럼 힘을 키우는 훈련</span><em id="bestBalls"></em></div>
+          <div class="gc-text"><b>공 띄우기</b><span>세게 마시는 힘</span><em id="bestBalls"></em></div>
           <div class="gc-art" aria-hidden="true"><i style="--y:.25"></i><i style="--y:.6"></i><i style="--y:1"></i></div>
         </button>
         <button class="game-card" data-game="steady">
-          <div class="gc-text"><b>일정하게 마시기</b><span>초록 구간 안에서 숨의 세기를 3초 일정하게. 호흡량을 고르게 조절하는 훈련</span><em id="bestSteady"></em></div>
+          <div class="gc-text"><b>일정하게 마시기</b><span>고르게 오래 마시기</span><em id="bestSteady"></em></div>
           <div class="gc-art steady" aria-hidden="true"><u></u><i style="--y:.5"></i></div>
         </button>
-        <p class="train-note"><b>어떻게 알아요?</b> 마이크로 숨소리의 크기만 분석해요. 소리는 기기 안에서만 처리하고 녹음·저장·전송하지 않아요. 실제 호흡량(mL)을 재는 건 아니고, 숨의 세기를 소리로 가늠하는 연습이에요. 입으로 마시거나 내쉬면 소리가 더 잘 잡혀요.</p>
+        <p class="train-note">숨소리 크기만 재요. 녹음·저장하지 않아요.</p>
       </div>
 
       <div id="trainGame" hidden>
         <div class="game-top">
-          <button class="btn-ghost" id="gameBack">← 훈련 목록</button>
+          <button class="btn-ghost" id="gameBack">← 목록</button>
           <span class="mic-pill" id="micPill"><i></i><span id="micPillText">대기</span></span>
+          <button class="btn-ghost help-btn" id="gameHelp" aria-label="방법 보기">?</button>
         </div>
         <div class="panel game-panel">
           <p class="game-title" id="gameTitle"></p>
+          <div class="guide" id="gameGuide" hidden></div>
+          <div class="game-play" id="gamePlay">
           <div class="tube-area" id="tubeArea" aria-hidden="true"></div>
           <div class="meter" aria-hidden="true"><i id="meterFill"></i></div>
           <p class="game-msg" id="gameMsg" role="status" aria-live="polite"></p>
           <p class="game-sub" id="gameSub"></p>
           <div class="rep-dots" id="repDots" aria-hidden="true"></div>
+          </div>
           <button class="btn-primary" id="gameStart">시작</button>
-          <button class="btn-text" id="demoToggle">마이크 없이 체험 (화면을 길게 눌러 불기)</button>
+          <button class="btn-text" id="demoToggle">마이크 없이 체험</button>
         </div>
       </div>
     </section>
