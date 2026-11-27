@@ -33,7 +33,7 @@
     <button class="icon-btn" id="stopBtn" aria-label="세션 종료">
       <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button>
-    <p class="session-meta" id="sessionMeta">20·3·20 · 3 사이클</p>
+    <p class="session-meta" id="sessionMeta">Lv.1 · 3회</p>
     <div class="session-actions">
       <button class="icon-btn" id="soundBtn" aria-label="소리 끄기" aria-pressed="true">
         <svg class="on" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -66,33 +66,25 @@
 
   <main id="main">
     <!-- ============ 오늘 (호흡) ============ -->
-    <section class="view view-breathe" id="view-breathe" aria-labelledby="greetTitle">
-      <div class="greet">
-        <p class="eyebrow" id="greetEyebrow">오늘의 훈련</p>
-        <h1 id="greetTitle">길게 마시고,<br>길게 내쉬기</h1>
-      </div>
-
+    <section class="view view-breathe" id="view-breathe" aria-label="호흡 훈련">
       <div class="hero" aria-hidden="true">
-        <div class="hero-text"><b id="heroTitle">기본 · 10·2·10</b><span id="heroMeta">3 사이클 · 약 1분</span></div>
+        <div class="hero-text">
+          <b id="heroTitle">Lv.1</b>
+          <div class="rh">
+            <span><svg viewBox="0 0 24 24"><path d="M4 19 20 5M11 5h9v9" /></svg><b id="rhIn">6</b><i>마시기</i></span>
+            <span><svg viewBox="0 0 24 24"><path d="M4 12h16" /></svg><b id="rhHold">2</b><i>멈춤</i></span>
+            <span><svg viewBox="0 0 24 24"><path d="M4 5l16 14M11 19h9v-9" /></svg><b id="rhOut">6</b><i>내쉬기</i></span>
+          </div>
+        </div>
         <svg class="tide-svg" id="tideHero" aria-hidden="true"></svg>
       </div>
-      <button class="btn-primary" id="startBtn">
+      <button class="btn-primary" id="startBtn" aria-label="호흡 시작">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
-        호흡 시작
+        시작 <small id="heroMeta">42초</small>
       </button>
 
-      <div class="block">
-        <div class="field-head"><h3>단계</h3><span class="hint">들숨 · 멈춤 · 날숨 (초)</span></div>
-        <div class="segmented" id="rhythmPicker" role="radiogroup" aria-label="단계"></div>
-      </div>
-      <div class="block">
-        <div class="field-head"><h3>반복</h3><span class="hint" id="totalTime">총 1분 6초</span></div>
-        <div class="pills" id="cyclePicker" role="radiogroup" aria-label="반복 사이클 수"></div>
-      </div>
-      <p class="tip">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 18 20 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        눈을 감아도 소리가 단계를 알려줘요
-      </p>
+      <div class="segmented" id="rhythmPicker" role="radiogroup" aria-label="단계"></div>
+      <div class="pills" id="cyclePicker" role="radiogroup" aria-label="반복 횟수"></div>
     </section>
 
     <!-- ============ 훈련 (마이크) ============ -->
@@ -232,7 +224,7 @@
       <div class="panel about">
         <p><b>안전 안내</b> 느린 호흡과 숨 멈춤은 사람에 따라 어지러움을 줄 수 있어요. 불편하면 즉시 멈추고 평소대로 숨 쉬세요. 숨결은 의료 기기가 아니에요.</p>
         <p><b>프라이버시</b> 계정·서버·추적이 없어요. 모든 기록은 이 기기에만 저장돼요. 훈련의 마이크 소리는 녹음하지 않고 기기 안에서만 분석해요.</p>
-<p class="version"><a href="privacy.html" target="_blank" rel="noopener">개인정보 처리방침</a> · 숨결 v2.6</p>
+<p class="version"><a href="privacy.html" target="_blank" rel="noopener">개인정보 처리방침</a> · 숨결 v2.7</p>
       </div>
     </section>
   </main>

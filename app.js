@@ -30,7 +30,7 @@
     { label: '적당했다', c: '#BDC4F3', k: 0.9 },
     { label: '힘들었다', c: '#F97F34', k: 1.0 },
   ];
-  const PHASE_LABEL = { inhale: '들이쉬기', hold: '멈추기', exhale: '내쉬기' };
+  const PHASE_LABEL = { inhale: '마시기', hold: '멈춤', exhale: '내쉬기' };
   const LEVEL_UP_AFTER = 3;
   const STORE_KEY = 'sumgyeol.v1';
   const LEGACY_KEY = 'breathingExerciseHistory';
@@ -321,7 +321,7 @@
     heroTitle: $('#heroTitle'), heroMeta: $('#heroMeta'),
     start: $('#startBtn'), stop: $('#stopBtn'), pause: $('#pauseBtn'), sound: $('#soundBtn'),
     sessionMeta: $('#sessionMeta'),
-    rhythmPicker: $('#rhythmPicker'), cyclePicker: $('#cyclePicker'), totalTime: $('#totalTime'),
+    rhythmPicker: $('#rhythmPicker'), cyclePicker: $('#cyclePicker'),
     todayCount: $('#todayCount'), streakCount: $('#streakCount'),
     announcer: $('#announcer'),
   };
@@ -375,7 +375,7 @@
   function startCountdown() {
     S.mode = 'prep';
     S.completed = 0; S.cycleIdx = -1; S.phase = null; S.record = null;
-    el.sessionMeta.textContent = `${rhythmLabel(S.rhythm)} · ${S.cycles} 사이클`;
+    el.sessionMeta.textContent = `${S.rhythm.name} · ${S.cycles}회`;
     layoutRing(S.rhythm);
     setMode('session'); setPhaseAttr('prep');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -431,7 +431,7 @@
   function enterPhase(phase, remaining) {
     setPhaseAttr(phase);
     el.phase.textContent = PHASE_LABEL[phase];
-    el.sessionMeta.textContent = `${rhythmLabel(S.rhythm)} · 사이클 ${S.cycleIdx + 1} / ${S.cycles}`;
+    el.sessionMeta.textContent = `${S.rhythm.name} · ${S.cycleIdx + 1} / ${S.cycles}`;
     Sound.breathe(phase, remaining);
     Sound.chime(phase);
     Device.buzz(phase);
@@ -486,7 +486,7 @@
 
     if (done === 0) {
       resetToIdle();
-      toast('한 사이클을 마치면 기록돼요');
+      toast('1회를 마치면 기록돼요');
       return;
     }
 
@@ -496,7 +496,7 @@
     setPhaseAttr('idle');
     el.phase.textContent = '완료';
     setCount('✓');
-    el.sessionMeta.textContent = `${done} 사이클 완료`;
+    el.sessionMeta.textContent = `${done}회 완료`;
     setRingProgress(1);
 
     const record = Records.add({
@@ -642,13 +642,13 @@
     el.rhythmPicker.innerHTML = RHYTHMS.map((r) => {
       const checked = r.id === S.rhythm.id;
       return `<button class="seg ${fulls[r.id] > 0 ? 'cleared' : ''}" role="radio" aria-checked="${checked}" data-id="${r.id}" aria-label="${r.name} ${r.inhale}초 들숨 ${r.hold}초 멈춤 ${r.exhale}초 날숨, 완주 ${fulls[r.id]}회">
-        <div class="sg"><span>${r.name}</span><b>${rhythmLabel(r)}</b></div></button>`;
+        <b>${r.name.replace('Lv.', '')}</b></button>`;
     }).join('');
     el.cyclePicker.innerHTML = CYCLE_OPTIONS.map((n) =>
       `<button class="pill" role="radio" aria-checked="${n === S.cycles}" data-n="${n}">${n}회</button>`).join('');
-    el.totalTime.textContent = `총 ${fmtDuration(cycleLen(S.rhythm) * S.cycles)}`;
-    el.heroTitle.textContent = `${S.rhythm.name} · ${rhythmLabel(S.rhythm)}`;
-    el.heroMeta.textContent = `${S.cycles} 사이클 · 약 ${fmtDuration(cycleLen(S.rhythm) * S.cycles)}`;
+    el.heroTitle.textContent = S.rhythm.name;
+    $('#rhIn').textContent = S.rhythm.inhale; $('#rhHold').textContent = S.rhythm.hold; $('#rhOut').textContent = S.rhythm.exhale;
+    el.heroMeta.textContent = fmtDuration(cycleLen(S.rhythm) * S.cycles);
   }
 
   function setRhythm(id) {
@@ -706,9 +706,7 @@
     }
   }
   function greet() {
-    const h = new Date().getHours();
-    $('#greetEyebrow').textContent = h < 5 ? '밤 훈련' : h < 11 ? '아침 훈련' : h < 17 ? '오후 훈련' : h < 22 ? '저녁 훈련' : '밤 훈련';
-    $('#greetTitle').innerHTML = '길게 마시고,<br>길게 내쉬기';
+    /* 홈 인사말은 없앴다 (글자 줄이기) */
   }
 
   /* ------------------------------------------------------------------
