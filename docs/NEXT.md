@@ -11,7 +11,7 @@
   - 앱 이름 `숨결: 호흡 훈련 · 폐활량 · 호흡 타이머`, 카테고리 건강/운동, 18세 이상, 방침 URL 등록됨.
   - 내부 테스트: 버전 3 (1.0.0.2) 게시됨(11-22), 검토 안 받음.
   - 비공개 테스트 - Alpha: 버전 3 출시 준비 저장됨, 국가 178개, 테스터 목록 **`숨결 테스터`**(11-26 새로 만듦, 지금은 logicmentorlab 1명) 연결됨.
-  - 게시 개요: **검토 제출 직전 — 변경 16개 대기** ("검토를 위해 변경사항 16개 제출" 버튼만 누르면 됨).
+  - 게시 개요: **11-29 검토 제출 완료 (사용자 지시)** — 변경 16개, Alpha 트랙은 **버전 4 (1.0.0.3)**. 제출 전 Play 자동 검사 통과. 상태 "검토 중인 변경사항", 보통 7일 이내.
   - 참여 링크(웹): https://play.google.com/apps/testing/com.vocallogic.sumgyeol
   - 참여 테스터 0명 (12명 × 14일 필요). 스토어 기본 언어가 en-US로 잡혀 있음(내용은 한국어) — [미검증] 문제 될지 모름.
 - 테스터 모집 글: `C:\dev\vocal-room-109\docs\testers\2026-11-23-모집글.txt`에 숨결을 함께 넣음 (`cb0648a`).
@@ -30,7 +30,10 @@
 ## 아이콘·색 통일 (11-29, v2.8)
 - 사용자 결정: 그림(통 3개 + 공 3개)은 그대로, **밝은 쪽으로 통일**. 흰 배경 + 남색으로 꽉 찬 통 + 선명한 공 (`icon-drafts/2026-11-29-light/light-B.png` → `final-1024.png`). 다른 시안(캐릭터·바람·링 등)은 `icon-drafts/2026-11-29*` 폴더에 보관, 채택 안 함.
 - 웹 반영 완료: `icons/` 전부 교체(maskable은 그림 58%로 원형 안전), 앱 안 마크(왼쪽 위·환영·완료 화면)도 같은 그림 `icons/mark.png`, manifest 배경·테마 `#FFFFFF`, 이름 `숨결 — 호흡 훈련`.
-- **아직 안 바뀐 것**: 폰 홈 화면 아이콘과 여는 순간 화면은 APK 안에 들어 있어서 **버전 4 빌드(PWABuilder) + Play 업로드**가 필요하다. 서명은 기존 업로드 키(`C:\dev\keys\sumgyeol_upload.keystore`, 비밀번호는 사용자 구글 비밀번호 관리자). Play 스토어 등록 아이콘은 `C:\dev\sumgyeol_release\icon-512-light-noalpha.png`로 교체.
+- **버전 4 (versionCode 4, 1.0.0.3) 빌드·제출 완료 (11-29)**: 새 아이콘 + 여는 화면 흰색. 산출물 `C:\dev\sumgyeol_release\v4\sumgyeol-v4.aab`·`.apk` (업로드 키 서명, SHA-256 1C:50… 확인). Play 스토어 등록 아이콘도 `icon-512-light-noalpha.png`로 교체.
+  - **다음 버전 만드는 법 (PWABuilder 사이트 없이 로컬)**: `v4\project\twa-manifest.json`의 `appVersionCode`·`appVersionName`을 올림 → `node gen.cjs <@bubblewrap/core가 깔린 node_modules 경로>` (프로젝트 생성) → `project`에서 `JAVA_HOME=C:/devtools/jdk-21.0.12.1+1 ANDROID_HOME=C:/devtools/android-sdk GRADLE_USER_HOME=C:/devtools/gradle-home ./gradlew.bat --no-daemon bundleRelease assembleRelease` → `python sign.py` (키 정보 파일에서 비밀번호를 읽어 환경변수로만 넘김, 출력 안 함). Bubblewrap CLI는 JDK 17만 받아서 CLI 대신 core만 쓴다. Play 업로드는 화면의 "업로드"가 처리 중에서 안 넘어가면 새로 고친 뒤 "라이브러리에서 추가".
+  - 실기기 확인은 못 함(폰 미연결). 폰에 깔린 v3는 업로드 키 서명본이라 `adb install -r sumgyeol-v4.apk`로 덮어쓸 수 있다.
+  - 스토어 스크린샷·그래픽 이미지는 옛 화면(v2.4, 남색 아이콘) 그대로다 — 교체 안 함.
 
 ## 발견한 문제
 - **딥 링크 도메인 검사 실패** (콘솔 경고 11-25). 원인: `assetlinks.json`은 도메인 맨 위(`https://logic-vc.github.io/.well-known/assetlinks.json`)에 있어야 하는데 `/breath-20/.well-known/` 아래에만 있다(맨 위는 404). 그리고 Play이 알려 준 현재 앱 서명 키 지문 `63:ED:A7:…:FE:F6`이 파일에 없다.
@@ -38,7 +41,7 @@
   - **해결함 (11-26, 사용자 승인)**: 공개 저장소 `logic-vc/logic-vc.github.io`(로컬 `C:\dev\logic-vc-site`)에 `assetlinks.json`(63:ED… + 기존 2개)을 올림. 구글 Digital Asset Links API가 읽는 것까지 확인. 콘솔 경고가 사라지는지는 [미검증] — 콘솔이 다시 검사해야 함. 폰에서 주소창이 안 보이면 해결된 것.
 
 ## 다음 할 일
-1. 변경 16개를 검토에 제출 (사용자 확인 후) → 승인되면 참여 링크를 테스터에게 보냄.
+1. Play 검토 결과 기다림(11-29 제출) → 승인되면 참여 링크를 테스터에게 보냄(사용자 확인 후).
 2. 모집으로 받은 지메일을 Play Console > 비공개 테스트 > 테스터 > `숨결 테스터` 목록에 추가 (Vocal Room 109 목록에도 같이).
 3. 실기기 테스트(마이크 민감도·진동·소리, 주소창 표시 여부).
 
