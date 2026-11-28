@@ -432,3 +432,6 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 1.5px
 .seg[aria-checked="true"].cleared::after { color: #fff; opacity: .8; }
 .rh b::after { content: "초"; font-size: 11px; font-weight: 600; margin-left: 1px; letter-spacing: 0; }
 .hero { height: clamp(250px, 47vh, 440px); }
+/* ---- 앱 안 마크를 앱 아이콘(통 3개 + 공 3개)과 통일 (v2.8) ---- */
+.brand-mark { width: 24px; height: 24px; border-radius: 0; background: url(icons/mark.png) center / contain no-repeat; box-shadow: none; }
+.summary-orb { width: 84px; height: 84px; border-radius: 0; background: url(icons/mark.png) center / contain no-repeat; box-shadow: none; }

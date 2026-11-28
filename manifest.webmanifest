@@ -1,18 +1,17 @@
 {
-  "name": "숨결 — 느린 호흡 트레이너",
+  "name": "숨결 — 호흡 훈련",
   "short_name": "숨결",
-  "description": "눈을 감고 소리만 따라가도 되는 느린 호흡(20·3·20) 트레이너",
+  "description": "길게 마시고 길게 내쉬는 호흡 훈련. 6초부터 40초까지 6단계",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#EEF4FC",
-  "theme_color": "#EEF4FC",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "categories": ["health", "lifestyle"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

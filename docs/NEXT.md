@@ -27,6 +27,11 @@
 - 레퍼런스 조사 요약(11-26): 훈련 앱은 "측정→기록→단계 추천", 화면은 단계명·남은 초·n/N만, 결과는 최고 기록 하나. 스크린샷은 확인 못 함(텍스트 설명 기준)
 - 화면 확인용: `_t.html`(git 제외) + `python -m http.server 8765` + `node ~/.claude/tools/shot.mjs`
 
+## 아이콘·색 통일 (11-29, v2.8)
+- 사용자 결정: 그림(통 3개 + 공 3개)은 그대로, **밝은 쪽으로 통일**. 흰 배경 + 남색으로 꽉 찬 통 + 선명한 공 (`icon-drafts/2026-11-29-light/light-B.png` → `final-1024.png`). 다른 시안(캐릭터·바람·링 등)은 `icon-drafts/2026-11-29*` 폴더에 보관, 채택 안 함.
+- 웹 반영 완료: `icons/` 전부 교체(maskable은 그림 58%로 원형 안전), 앱 안 마크(왼쪽 위·환영·완료 화면)도 같은 그림 `icons/mark.png`, manifest 배경·테마 `#FFFFFF`, 이름 `숨결 — 호흡 훈련`.
+- **아직 안 바뀐 것**: 폰 홈 화면 아이콘과 여는 순간 화면은 APK 안에 들어 있어서 **버전 4 빌드(PWABuilder) + Play 업로드**가 필요하다. 서명은 기존 업로드 키(`C:\dev\keys\sumgyeol_upload.keystore`, 비밀번호는 사용자 구글 비밀번호 관리자). Play 스토어 등록 아이콘은 `C:\dev\sumgyeol_release\icon-512-light-noalpha.png`로 교체.
+
 ## 발견한 문제
 - **딥 링크 도메인 검사 실패** (콘솔 경고 11-25). 원인: `assetlinks.json`은 도메인 맨 위(`https://logic-vc.github.io/.well-known/assetlinks.json`)에 있어야 하는데 `/breath-20/.well-known/` 아래에만 있다(맨 위는 404). 그리고 Play이 알려 준 현재 앱 서명 키 지문 `63:ED:A7:…:FE:F6`이 파일에 없다.
   - 영향 [추론]: 앱을 열면 맨 위에 브라우저 주소창이 보이는 "웹페이지 같은" 화면이 된다. 심사를 막는 문제는 아니다.
